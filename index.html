@@ -1,4 +1,4 @@
-<selection-tag><!doctype html>
+<selection-tag><!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
@@ -52,14 +52,14 @@
     
     /* Glassmorphism Styles for Light & Dark Theme */
     .dark .glass-panel {
-      background: rgba(15, 17, 24, 0.85);
+      background: rgba(15, 17, 24, 0.88);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: #f8fafc;
     }
     .glass-panel {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(0, 0, 0, 0.12);
@@ -67,7 +67,7 @@
     }
     
     .dark .glass-card {
-      background: rgba(20, 22, 32, 0.7);
+      background: rgba(20, 22, 32, 0.75);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
     .glass-card {
@@ -102,16 +102,44 @@
       background: #090a0f;
       touch-action: none;
     }
+
+    .toast-slide {
+      animation: toastIn 0.3s ease forwards;
+    }
+    @keyframes toastIn {
+      from { transform: translateY(100%) scale(0.9); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    /* Terminal blinking cursor */
+    .cursor-blink {
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .audio-wave-bar {
+      animation: wavePulse 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes wavePulse {
+      0% { height: 6px; }
+      100% { height: 22px; }
+    }
   </style>
 </head>
 
-<body class="bg-brand-lightBg text-slate-900 dark:bg-brand-black dark:text-slate-100 transition-colors duration-300 relative min-h-screen">
+<body class="bg-brand-lightBg text-slate-900 dark:bg-brand-black dark:text-slate-100 transition-colors duration-300 relative min-h-screen pb-12">
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- 3D Background Canvas -->
   <div id="canvas-container" class="fixed inset-0 pointer-events-none z-0 opacity-40 dark:opacity-60"></div>
 
   <!-- Header / Navigation -->
-  <header class="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 py-4">
+  <header class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-8 py-4">
     <div class="max-w-7xl mx-auto rounded-2xl glass-panel transition-all duration-300 px-6 py-3 flex items-center justify-between shadow-2xl">
       
       <!-- Brand Logo -->
@@ -126,20 +154,27 @@
       </a>
 
       <!-- Desktop Navigation Links -->
-      <nav class="hidden md:flex items-center gap-8 text-sm font-semibold">
+      <nav class="hidden md:flex items-center gap-7 text-sm font-semibold">
         <a href="#about" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_about">About</a>
         <a href="#projects" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_projects">Projects</a>
+        <a href="#architecture" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_arch">Ecosystem</a>
+        <a href="#telemetry" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_telemetry">Live Mesh</a>
         <a href="#minigame" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors flex items-center gap-1.5">
           <i data-lucide="gamepad-2" class="w-4 h-4 text-emerald-500"></i>
           <span data-i18n="nav_game">Cyber Game</span>
         </a>
         <a href="#founder" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_founder">Leadership</a>
-        <a href="#contact" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_contact">Contact</a>
       </nav>
 
-      <!-- Language & Theme Controls -->
-      <div class="flex items-center gap-3">
+      <!-- Language, Theme & Console Controls -->
+      <div class="flex items-center gap-2 sm:gap-3">
         
+        <!-- Terminal Drawer Trigger Button -->
+        <button onclick="toggleConsole()" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-300 dark:border-neutral-800 bg-neutral-100/90 dark:bg-neutral-900/90 text-xs font-mono font-semibold text-slate-900 dark:text-emerald-400 hover:border-emerald-500 transition-all" title="Toggle Developer Terminal (~)">
+          <i data-lucide="terminal" class="w-4 h-4"></i>
+          <span>CLI</span>
+        </button>
+
         <!-- Language Selector Dropdown -->
         <div class="relative inline-block text-left" id="langDropdownContainer">
           <button id="langBtn" onclick="toggleLangDropdown()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-neutral-300 dark:border-neutral-800 bg-neutral-100/90 dark:bg-neutral-900/90 text-xs font-semibold text-slate-900 dark:text-slate-100 hover:border-neutral-400 dark:hover:border-neutral-600 transition-all">
@@ -171,11 +206,38 @@
     <div id="mobileMenu" class="hidden md:hidden max-w-7xl mx-auto mt-2 rounded-2xl glass-panel p-6 flex flex-col gap-4 shadow-xl">
       <a href="#about" onclick="toggleMobileMenu()" class="text-slate-800 dark:text-slate-200 font-medium" data-i18n="nav_about">About</a>
       <a href="#projects" onclick="toggleMobileMenu()" class="text-slate-800 dark:text-slate-200 font-medium" data-i18n="nav_projects">Projects</a>
+      <a href="#architecture" onclick="toggleMobileMenu()" class="text-slate-800 dark:text-slate-200 font-medium" data-i18n="nav_arch">Ecosystem</a>
+      <a href="#telemetry" onclick="toggleMobileMenu()" class="text-slate-800 dark:text-slate-200 font-medium" data-i18n="nav_telemetry">Live Mesh</a>
       <a href="#minigame" onclick="toggleMobileMenu()" class="text-slate-800 dark:text-slate-200 font-medium" data-i18n="nav_game">Cyber Game</a>
       <a href="#founder" onclick="toggleMobileMenu()" class="text-slate-800 dark:text-slate-200 font-medium" data-i18n="nav_founder">Leadership</a>
-      <a href="#contact" onclick="toggleMobileMenu()" class="text-slate-800 dark:text-slate-200 font-medium" data-i18n="nav_contact">Contact</a>
+      <button onclick="toggleMobileMenu(); toggleConsole();" class="text-left font-mono text-emerald-500 font-semibold flex items-center gap-2">
+        <i data-lucide="terminal" class="w-4 h-4"></i> Open DeLoY Console CLI
+      </button>
     </div>
   </header>
+
+  <!-- Developer CLI Drawer / Terminal -->
+  <div id="consoleDrawer" class="fixed top-24 right-4 sm:right-8 z-50 w-[92vw] sm:w-[480px] rounded-2xl bg-neutral-950/95 text-emerald-400 border border-neutral-800 shadow-2xl p-4 font-mono text-xs hidden transition-all duration-300 backdrop-blur-xl">
+    <div class="flex items-center justify-between pb-3 mb-3 border-b border-neutral-800 text-neutral-400">
+      <div class="flex items-center gap-2">
+        <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+        <span class="text-[11px] font-bold text-neutral-300 ml-2">deloy-cli ~ v2.4.0</span>
+      </div>
+      <button onclick="toggleConsole()" class="hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+    
+    <div id="terminalOutput" class="h-64 overflow-y-auto space-y-2 pr-1 mb-3">
+      <div class="text-neutral-400">DeLoYGroup Cyber Terminal System</div>
+      <div class="text-neutral-500">Type <span class="text-amber-400 font-bold">help</span> to view available terminal commands.</div>
+    </div>
+
+    <form onsubmit="handleCliSubmit(event)" class="flex items-center gap-2 pt-2 border-t border-neutral-800">
+      <span class="text-emerald-500 font-bold">&gt;</span>
+      <input id="cliInput" type="text" placeholder="type help, projects, status, founder..." class="w-full bg-transparent text-emerald-300 border-none outline-none font-mono text-xs focus:ring-0">
+    </form>
+  </div>
 
   <!-- Hero Section -->
   <section class="relative pt-36 pb-20 md:pt-48 md:pb-32 px-4 sm:px-8 z-10 overflow-hidden" id="about">
@@ -204,45 +266,178 @@
           <i data-lucide="globe" class="w-5 h-5"></i>
           <span>deloygame.xyz</span>
         </a>
-        <a href="#minigame" class="px-8 py-4 rounded-xl border border-neutral-300 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 text-slate-900 dark:text-white font-bold text-sm sm:text-base hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all hover:scale-105 active:scale-95 flex items-center gap-3 backdrop-blur-md shadow-md">
-          <i data-lucide="gamepad-2" class="w-5 h-5 text-emerald-500"></i>
-          <span data-i18n="btn_play_mini">Play Mini-Game</span>
-        </a>
+        <button onclick="openSocialMockupModal()" class="px-8 py-4 rounded-xl border border-neutral-300 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 text-slate-900 dark:text-white font-bold text-sm sm:text-base hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all hover:scale-105 active:scale-95 flex items-center gap-3 backdrop-blur-md shadow-md">
+          <i data-lucide="smartphone" class="w-5 h-5 text-sky-500"></i>
+          <span data-i18n="btn_app_preview">Preview Hybrid App</span>
+        </button>
       </div>
 
-      <!-- Quick Contact Info Cards Strip -->
+      <!-- Quick Verified Contact Info Cards Strip -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-16 max-w-4xl mx-auto p-4 rounded-2xl glass-panel border border-neutral-200 dark:border-neutral-800">
-        <a href="https://wa.me/79270938818" target="_blank" class="p-4 rounded-xl bg-neutral-100/80 dark:bg-neutral-900/50 hover:border-emerald-500 border border-transparent transition-all flex items-center gap-3 text-left">
-          <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-            <i data-lucide="phone-call" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <div class="text-[10px] font-mono text-neutral-500 uppercase">WhatsApp</div>
-            <div class="text-xs font-bold text-slate-900 dark:text-white">+7 927 093-88-18</div>
-          </div>
-        </a>
+        <div class="p-4 rounded-xl bg-neutral-100/80 dark:bg-neutral-900/50 hover:border-emerald-500 border border-transparent transition-all flex items-center justify-between text-left group">
+          <a href="https://wa.me/79270938818" target="_blank" class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+              <i data-lucide="phone-call" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono text-neutral-500 uppercase">WhatsApp Official</div>
+              <div class="text-xs font-bold text-slate-900 dark:text-white">+7 927 093-88-18</div>
+            </div>
+          </a>
+          <button onclick="copyToClipboard('+7 927 093-88-18', 'WhatsApp Phone')" class="text-neutral-400 hover:text-emerald-500 p-2" title="Copy Phone Number">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+        </div>
 
-        <a href="mailto:support@deloygame.xyz" class="p-4 rounded-xl bg-neutral-100/80 dark:bg-neutral-900/50 hover:border-sky-500 border border-transparent transition-all flex items-center gap-3 text-left">
-          <div class="w-10 h-10 rounded-lg bg-sky-500/10 text-sky-500 flex items-center justify-center shrink-0">
-            <i data-lucide="mail" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <div class="text-[10px] font-mono text-neutral-500 uppercase">Official Email</div>
-            <div class="text-xs font-bold text-slate-900 dark:text-white truncate">support@deloygame.xyz</div>
-          </div>
-        </a>
+        <div class="p-4 rounded-xl bg-neutral-100/80 dark:bg-neutral-900/50 hover:border-sky-500 border border-transparent transition-all flex items-center justify-between text-left group">
+          <a href="mailto:support@deloygame.xyz" class="flex items-center gap-3 truncate">
+            <div class="w-10 h-10 rounded-lg bg-sky-500/10 text-sky-500 flex items-center justify-center shrink-0">
+              <i data-lucide="mail" class="w-5 h-5"></i>
+            </div>
+            <div class="truncate">
+              <div class="text-[10px] font-mono text-neutral-500 uppercase">Official Email</div>
+              <div class="text-xs font-bold text-slate-900 dark:text-white truncate">support@deloygame.xyz</div>
+            </div>
+          </a>
+          <button onclick="copyToClipboard('support@deloygame.xyz', 'Official Email')" class="text-neutral-400 hover:text-sky-500 p-2" title="Copy Email">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+        </div>
 
-        <a href="https://deloygame.xyz" target="_blank" class="p-4 rounded-xl bg-neutral-100/80 dark:bg-neutral-900/50 hover:border-purple-500 border border-transparent transition-all flex items-center gap-3 text-left">
-          <div class="w-10 h-10 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
-            <i data-lucide="globe" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <div class="text-[10px] font-mono text-neutral-500 uppercase">Official Portal</div>
-            <div class="text-xs font-bold text-slate-900 dark:text-white">deloygame.xyz</div>
-          </div>
-        </a>
+        <div class="p-4 rounded-xl bg-neutral-100/80 dark:bg-neutral-900/50 hover:border-purple-500 border border-transparent transition-all flex items-center justify-between text-left group">
+          <a href="https://deloygame.xyz" target="_blank" class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+              <i data-lucide="globe" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono text-neutral-500 uppercase">Portal Website</div>
+              <div class="text-xs font-bold text-slate-900 dark:text-white">deloygame.xyz</div>
+            </div>
+          </a>
+          <button onclick="copyToClipboard('https://deloygame.xyz', 'Website URL')" class="text-neutral-400 hover:text-purple-500 p-2" title="Copy Website Link">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+        </div>
       </div>
 
+    </div>
+  </section>
+
+  <!-- Interactive Ecosystem Architecture Diagram Section -->
+  <section class="py-20 px-4 sm:px-8 relative z-10" id="architecture">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-16">
+        <div class="text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2" data-i18n="arch_subtitle">Mesh Core Architecture</div>
+        <h2 class="font-heading text-3xl sm:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" data-i18n="arch_title">Integrated DeLoY Mesh Flow</h2>
+        <p class="text-slate-600 dark:text-neutral-300 max-w-2xl mx-auto text-sm mt-3" data-i18n="arch_desc">
+          Click any ecosystem node to inspect real-time component protocols, data encryption layers, and direct sync channels.
+        </p>
+      </div>
+
+      <!-- Diagram Nodes Canvas Frame -->
+      <div class="rounded-3xl glass-panel p-8 border border-neutral-200 dark:border-neutral-800 shadow-2xl relative overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+          
+          <!-- Node 1: DeLoY Social Engine -->
+          <div onclick="selectArchNode('social')" id="node-social" class="cursor-pointer p-6 rounded-2xl glass-card border border-neutral-300 dark:border-neutral-700 hover:border-sky-500 dark:hover:border-sky-400 transition-all hover:scale-105 group relative">
+            <div class="w-12 h-12 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center mb-4">
+              <i data-lucide="messages-square" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-heading text-xl font-bold text-slate-900 dark:text-white mb-2">DeLoY Social Engine</h3>
+            <p class="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed">
+              Hybrid messaging matrix (WhatsApp E2EE) + Stories & Media Streaming (Instagram Feed).
+            </p>
+            <div class="mt-4 flex items-center gap-2 text-[11px] font-mono text-sky-500 font-semibold">
+              <span>Inspect Node Protocol</span> <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <!-- Central Core Node: DeLoY Auth & Cloud Matrix -->
+          <div onclick="selectArchNode('cloud')" id="node-cloud" class="cursor-pointer p-6 rounded-2xl bg-neutral-900 text-white dark:bg-white dark:text-black shadow-2xl border-2 border-emerald-500 transition-all hover:scale-105 group relative">
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 dark:bg-emerald-500/20 dark:text-emerald-700 flex items-center justify-center mb-4">
+              <i data-lucide="cpu" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-heading text-xl font-bold mb-2">DeLoY Cloud & Auth Core</h3>
+            <p class="text-xs opacity-80 leading-relaxed">
+              Centralized zero-knowledge identity, instant cross-app telemetry, and session authorization.
+            </p>
+            <div class="mt-4 flex items-center gap-2 text-[11px] font-mono text-emerald-400 dark:text-emerald-700 font-semibold">
+              <span>Central Core Matrix</span> <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+            </div>
+          </div>
+
+          <!-- Node 3: DeLoYGame Portal -->
+          <div onclick="selectArchNode('game')" id="node-game" class="cursor-pointer p-6 rounded-2xl glass-card border border-neutral-300 dark:border-neutral-700 hover:border-purple-500 dark:hover:border-purple-400 transition-all hover:scale-105 group relative">
+            <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-4">
+              <i data-lucide="gamepad-2" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-heading text-xl font-bold text-slate-900 dark:text-white mb-2">DeLoYGame Hub</h3>
+            <p class="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed">
+              High-throughput multiplayer lobby, cloud leaderboards, and web-based games (deloygame.xyz).
+            </p>
+            <div class="mt-4 flex items-center gap-2 text-[11px] font-mono text-purple-500 font-semibold">
+              <span>Inspect Node Protocol</span> <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Dynamic Node Detail Panel -->
+        <div id="archDetailPanel" class="mt-8 p-6 rounded-2xl bg-neutral-100/90 dark:bg-neutral-900/90 border border-neutral-300 dark:border-neutral-800">
+          <div class="flex items-center gap-3 mb-2">
+            <i data-lucide="info" class="w-5 h-5 text-emerald-500"></i>
+            <h4 id="archDetailTitle" class="font-heading font-bold text-base text-slate-900 dark:text-white">Selected Node: DeLoY Cloud & Auth Core</h4>
+          </div>
+          <p id="archDetailDesc" class="text-xs text-slate-700 dark:text-neutral-300 font-mono leading-relaxed">
+            [CORE PROTOCOL]: Coordinates real-time WebSockets between DeLoY Social and DeLoYGame portal using AES-256 GCM encryption and automated fallback relay nodes.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live System Telemetry & Network Status Dashboard -->
+  <section class="py-16 px-4 sm:px-8 relative z-10" id="telemetry">
+    <div class="max-w-7xl mx-auto">
+      <div class="rounded-3xl glass-panel p-8 border border-neutral-200 dark:border-neutral-800 shadow-2xl">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 pb-6 border-b border-neutral-200 dark:border-neutral-800">
+          <div>
+            <div class="text-xs font-mono text-emerald-500 font-bold uppercase flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> SYSTEM HEALTH & TELEMETRY
+            </div>
+            <h3 class="font-heading text-2xl font-bold text-slate-900 dark:text-white mt-1">Live Global Mesh Operations</h3>
+          </div>
+          <div class="text-xs font-mono text-neutral-500 bg-neutral-200/60 dark:bg-neutral-800/60 px-4 py-2 rounded-xl">
+            STATUS: <span class="text-emerald-500 font-bold">100% OPERATIONAL</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-left">
+          <div class="p-4 rounded-2xl bg-neutral-100/80 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800">
+            <div class="text-[11px] font-mono text-neutral-500 uppercase mb-1">Total System Uptime</div>
+            <div class="font-heading text-2xl font-extrabold text-slate-900 dark:text-white">99.98%</div>
+            <div class="text-[10px] text-emerald-500 font-mono mt-1">+0.02% 30-day index</div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-neutral-100/80 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800">
+            <div class="text-[11px] font-mono text-neutral-500 uppercase mb-1">Global Active Sessions</div>
+            <div id="statActiveSessions" class="font-heading text-2xl font-extrabold text-slate-900 dark:text-white">14,280</div>
+            <div class="text-[10px] text-sky-500 font-mono mt-1">DeLoYGame + Social Live</div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-neutral-100/80 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800">
+            <div class="text-[11px] font-mono text-neutral-500 uppercase mb-1">Regional Relay Latency</div>
+            <div class="font-heading text-2xl font-extrabold text-slate-900 dark:text-white">18ms <span class="text-xs font-normal text-neutral-500">(Baku)</span></div>
+            <div class="text-[10px] text-neutral-400 font-mono mt-1">Frankfurt: 28ms | Ashburn: 42ms</div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-neutral-100/80 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800">
+            <div class="text-[11px] font-mono text-neutral-500 uppercase mb-1">Encrypted Packet Throughput</div>
+            <div id="statThroughput" class="font-heading text-2xl font-extrabold text-slate-900 dark:text-white">2.8 GB/s</div>
+            <div class="text-[10px] text-purple-500 font-mono mt-1">AES-256 E2EE Pipe</div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -299,7 +494,10 @@
 
           <!-- Bottom CTA Block -->
           <div class="pt-6 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-            <span class="text-xs text-neutral-500 font-mono" data-i18n="project_hybrid_eta">Estimated Beta Launch: Q4 2026</span>
+            <button onclick="openSocialMockupModal()" class="px-5 py-2.5 rounded-xl bg-sky-500 text-white font-semibold text-xs hover:bg-sky-600 transition-colors flex items-center gap-2 shadow-lg">
+              <i data-lucide="smartphone" class="w-4 h-4"></i>
+              <span data-i18n="btn_app_preview">Launch Interactive Mockup</span>
+            </button>
             <button onclick="openContactModal('DeLoY Social App Waitlist')" class="px-5 py-2.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs hover:opacity-90 transition-opacity flex items-center gap-2">
               <span data-i18n="btn_join_waitlist">Join Waitlist</span>
               <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
@@ -355,6 +553,46 @@
     </div>
   </section>
 
+  <!-- Expanded Strategic Roadmap (2024 - 2027+) -->
+  <section class="py-20 px-4 sm:px-8 relative z-10" id="roadmap">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16">
+        <div class="text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2">Development Roadmap</div>
+        <h2 class="font-heading text-3xl sm:text-5xl font-bold text-slate-900 dark:text-white">Engineering Timeline</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+        <div class="p-6 rounded-2xl glass-panel border border-neutral-200 dark:border-neutral-800 relative">
+          <div class="text-xs font-mono text-emerald-500 font-bold mb-2">2024 • FOUNDATION</div>
+          <h4 class="font-heading font-bold text-lg text-slate-900 dark:text-white mb-2">DeLoY Core Setup</h4>
+          <p class="text-xs text-slate-600 dark:text-neutral-400">Establishment of DeLoYGroup architecture and central cloud identity protocols by Rafiq Qadirov.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl glass-panel border border-emerald-500/40 relative bg-emerald-500/5">
+          <div class="text-xs font-mono text-emerald-500 font-bold mb-2 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 2025 • COMPLETED
+          </div>
+          <h4 class="font-heading font-bold text-lg text-slate-900 dark:text-white mb-2">DeLoYGame Launch</h4>
+          <p class="text-xs text-slate-600 dark:text-neutral-400">Official launch of deloygame.xyz interactive gaming portal and leaderboard engine.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl glass-panel border border-amber-500/40 relative bg-amber-500/5">
+          <div class="text-xs font-mono text-amber-500 font-bold mb-2 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span> 2026 • CURRENT
+          </div>
+          <h4 class="font-heading font-bold text-lg text-slate-900 dark:text-white mb-2">Hybrid Social App</h4>
+          <p class="text-xs text-slate-600 dark:text-neutral-400">Engineering WhatsApp (messaging) + Instagram (stories/media) hybrid social application.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl glass-panel border border-neutral-200 dark:border-neutral-800 relative opacity-80">
+          <div class="text-xs font-mono text-neutral-500 font-bold mb-2">2027+ • FUTURE</div>
+          <h4 class="font-heading font-bold text-lg text-slate-900 dark:text-white mb-2">Global Expansion</h4>
+          <p class="text-xs text-slate-600 dark:text-neutral-400">Expansion of edge server relays, VOIP infrastructure, and web3 creator tools.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Interactive Mini-Game Section -->
   <section class="py-20 px-4 sm:px-8 relative z-10" id="minigame">
     <div class="max-w-5xl mx-auto">
@@ -385,6 +623,10 @@
               <span class="text-[10px] font-mono text-neutral-500 block uppercase" data-i18n="game_highscore">BEST SCORE</span>
               <span id="highScoreDisplay" class="font-heading font-bold text-xl sm:text-2xl text-slate-800 dark:text-slate-200">0</span>
             </div>
+            <div>
+              <span class="text-[10px] font-mono text-neutral-500 block uppercase">POWER-UP</span>
+              <span id="powerUpDisplay" class="font-heading font-bold text-xs text-amber-500 uppercase">NORMAL</span>
+            </div>
           </div>
 
           <div class="flex items-center gap-3">
@@ -407,7 +649,7 @@
               <i data-lucide="shield-alert" class="w-8 h-8"></i>
             </div>
             <h3 id="overlayTitle" class="font-heading text-2xl sm:text-3xl font-extrabold mb-2">DeLoY Cyber Defense</h3>
-            <p id="overlaySub" class="text-xs sm:text-sm text-neutral-300 max-w-md mb-6">Use Left/Right arrow keys, A/D, or tap side controls to shoot down invading system glitches.</p>
+            <p id="overlaySub" class="text-xs sm:text-sm text-neutral-300 max-w-md mb-6">Use Left/Right arrow keys, A/D, or tap side controls to shoot down invading system glitches and collect multi-shot powerups.</p>
             <button onclick="startGame()" class="px-8 py-3.5 rounded-xl bg-emerald-500 text-black font-extrabold text-sm hover:bg-emerald-400 transition-all transform hover:scale-105 shadow-xl flex items-center gap-2">
               <i data-lucide="play" class="w-4 h-4 fill-current"></i>
               <span id="overlayBtnText" data-i18n="game_start_btn">START DEFENSE</span>
@@ -477,7 +719,7 @@
               <div class="flex items-center gap-3">
                 <i data-lucide="message-circle" class="w-5 h-5 text-emerald-500"></i>
                 <div class="text-xs">
-                  <span class="block text-neutral-500">WhatsApp:</span>
+                  <span class="block text-neutral-500">WhatsApp Official:</span>
                   <a href="https://wa.me/79270938818" target="_blank" class="font-bold text-slate-900 dark:text-white hover:underline">+7 927 093-88-18</a>
                 </div>
               </div>
@@ -485,7 +727,7 @@
               <div class="flex items-center gap-3">
                 <i data-lucide="mail" class="w-5 h-5 text-sky-500"></i>
                 <div class="text-xs truncate">
-                  <span class="block text-neutral-500">Email:</span>
+                  <span class="block text-neutral-500">Official Email:</span>
                   <a href="mailto:support@deloygame.xyz" class="font-bold text-slate-900 dark:text-white hover:underline truncate">support@deloygame.xyz</a>
                 </div>
               </div>
@@ -509,6 +751,117 @@
       </div>
     </div>
   </section>
+
+  <!-- Interactive DeLoY Social Preview Smartphone Modal -->
+  <div id="socialMockupModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="max-w-md w-full bg-neutral-950 text-white rounded-[40px] border-4 border-neutral-800 shadow-2xl relative overflow-hidden flex flex-col h-[680px]">
+      
+      <!-- Top Speaker Notch -->
+      <div class="w-32 h-5 bg-neutral-800 rounded-b-xl mx-auto flex items-center justify-center gap-2 px-3">
+        <div class="w-10 h-1.5 bg-neutral-600 rounded-full"></div>
+        <div class="w-2 h-2 bg-neutral-700 rounded-full"></div>
+      </div>
+
+      <!-- Phone App Header -->
+      <div class="p-4 border-b border-neutral-800 flex items-center justify-between bg-neutral-900/80">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-sky-500 text-black font-extrabold flex items-center justify-center text-xs">D</div>
+          <span class="font-heading font-bold text-sm">DeLoY Social</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded-md">WhatsApp + Insta Hybrid</span>
+          <button onclick="closeSocialMockupModal()" class="text-neutral-400 hover:text-white p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+      </div>
+
+      <!-- Tab Buttons (Messaging vs Feed) -->
+      <div class="grid grid-cols-2 text-center text-xs font-semibold border-b border-neutral-800 bg-neutral-900">
+        <button id="tabBtnMsg" onclick="switchPhoneTab('messages')" class="py-3 text-sky-400 border-b-2 border-sky-400 flex items-center justify-center gap-1.5">
+          <i data-lucide="message-square" class="w-4 h-4"></i> WhatsApp Chats
+        </button>
+        <button id="tabBtnFeed" onclick="switchPhoneTab('feed')" class="py-3 text-neutral-400 border-b-2 border-transparent flex items-center justify-center gap-1.5">
+          <i data-lucide="instagram" class="w-4 h-4"></i> Insta Feed
+        </button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+        
+        <!-- Tab 1: Messages View -->
+        <div id="phoneViewMessages" class="space-y-3">
+          <div class="p-3 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">RQ</div>
+              <div>
+                <div class="text-xs font-bold">Rafiq Qadirov (deloy)</div>
+                <div class="text-[10px] text-neutral-400">DeLoY Mesh core deployed successfully!</div>
+              </div>
+            </div>
+            <span class="text-[9px] font-mono text-neutral-500">12:42</span>
+          </div>
+
+          <!-- Audio Message Card -->
+          <div class="p-3 rounded-2xl bg-neutral-900 border border-neutral-800 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-sky-400">Voice Note • End-to-End Encrypted</span>
+              <span class="text-[10px] font-mono text-neutral-500">0:24</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button class="w-8 h-8 rounded-full bg-sky-500 text-black flex items-center justify-center"><i data-lucide="play" class="w-4 h-4 fill-current"></i></button>
+              <div class="flex items-center gap-1 flex-1">
+                <div class="w-1 bg-sky-400 audio-wave-bar"></div>
+                <div class="w-1 bg-sky-400 audio-wave-bar" style="animation-delay: 0.2s"></div>
+                <div class="w-1 bg-sky-400 audio-wave-bar" style="animation-delay: 0.4s"></div>
+                <div class="w-1 bg-sky-400 audio-wave-bar" style="animation-delay: 0.1s"></div>
+                <div class="w-1 bg-sky-400 audio-wave-bar" style="animation-delay: 0.3s"></div>
+                <div class="w-1 bg-sky-400 audio-wave-bar" style="animation-delay: 0.5s"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Stories / Instagram Feed View -->
+        <div id="phoneViewFeed" class="hidden space-y-4">
+          <!-- Story Bubbles -->
+          <div class="flex items-center gap-3 overflow-x-auto pb-2 border-b border-neutral-800">
+            <div class="text-center shrink-0">
+              <div class="w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-amber-500 to-purple-500"><div class="w-full h-full bg-neutral-900 rounded-full flex items-center justify-center text-xs font-bold">You</div></div>
+              <span class="text-[10px] text-neutral-400 mt-1 block">Your Story</span>
+            </div>
+            <div class="text-center shrink-0">
+              <div class="w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-sky-500 to-emerald-500"><div class="w-full h-full bg-neutral-900 rounded-full flex items-center justify-center text-xs font-bold">RQ</div></div>
+              <span class="text-[10px] text-neutral-400 mt-1 block">deloy</span>
+            </div>
+          </div>
+
+          <!-- Feed Post -->
+          <div class="rounded-2xl bg-neutral-900 border border-neutral-800 overflow-hidden">
+            <div class="p-3 flex items-center gap-2">
+              <div class="w-7 h-7 rounded-full bg-purple-500 text-white font-bold text-xs flex items-center justify-center">D</div>
+              <span class="text-xs font-bold">deloygame_official</span>
+            </div>
+            <div class="h-40 bg-gradient-to-tr from-neutral-800 to-neutral-900 flex flex-col items-center justify-center p-4 text-center">
+              <i data-lucide="gamepad-2" class="w-10 h-10 text-emerald-400 mb-2"></i>
+              <span class="font-heading font-extrabold text-sm">DeLoY Cyber Defense Arcade</span>
+            </div>
+            <div class="p-3 flex items-center justify-between text-neutral-400">
+              <div class="flex items-center gap-3">
+                <i data-lucide="heart" class="w-5 h-5 text-rose-500 fill-rose-500"></i>
+                <i data-lucide="message-circle" class="w-5 h-5"></i>
+                <i data-lucide="send" class="w-5 h-5"></i>
+              </div>
+              <i data-lucide="bookmark" class="w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="p-3 bg-neutral-900 border-t border-neutral-800 text-center">
+        <button onclick="openContactModal('DeLoY Social Beta Testing')" class="w-full py-2.5 rounded-xl bg-sky-500 text-white font-bold text-xs">Request Beta Access</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Contact & Footer Section -->
   <footer class="py-16 px-4 sm:px-8 border-t border-neutral-200 dark:border-neutral-800 relative z-10 glass-panel" id="contact">
@@ -601,6 +954,8 @@
       EN: {
         nav_about: "About",
         nav_projects: "Projects",
+        nav_arch: "Ecosystem",
+        nav_telemetry: "Live Mesh",
         nav_game: "Cyber Game",
         nav_founder: "Leadership",
         nav_contact: "Contact",
@@ -608,7 +963,10 @@
         hero_title1: "ARCHITECTING THE",
         hero_title2: "FUTURE OF SOCIAL & GAMING",
         hero_sub: "DeLoYGroup is an independent tech conglomerate specializing in interactive gaming platforms and unified social communication networks. Founded & engineered by Rafiq Qadirov (deloy).",
-        btn_play_mini: "Play Mini-Game",
+        btn_app_preview: "Preview Hybrid App",
+        arch_subtitle: "Mesh Core Architecture",
+        arch_title: "Integrated DeLoY Mesh Flow",
+        arch_desc: "Click any ecosystem node to inspect real-time component protocols, data encryption layers, and direct sync channels.",
         projects_subtitle: "Portfolio & Innovation",
         projects_title: "Flagship Ecosystem Products",
         projects_desc: "Building high-throughput digital experiences for interactive gaming and unified mobile social networks.",
@@ -644,6 +1002,8 @@
       RU: {
         nav_about: "О компании",
         nav_projects: "Проекты",
+        nav_arch: "Экосистема",
+        nav_telemetry: "Сеть Live",
         nav_game: "Мини-Игра",
         nav_founder: "Руководство",
         nav_contact: "Контакты",
@@ -651,7 +1011,10 @@
         hero_title1: "ПРОЕКТИРУЕМ",
         hero_title2: "БУДУЩЕЕ СОЦСЕТЕЙ И ГЕЙМИНГА",
         hero_sub: "DeLoYGroup — независимая технологическая компания, создающая интерактивные игровые платформы и объединенные социальные сети. Основатель — Рафик Кадиров (deloy).",
-        btn_play_mini: "Играть в Мини-Игру",
+        btn_app_preview: "Предпросмотр Соцсети",
+        arch_subtitle: "Архитектура Сети",
+        arch_title: "Интегрированная Сеть DeLoY",
+        arch_desc: "Нажмите на любой узел экосистемы для просмотра протоколов шифрования и каналов синхронизации.",
         projects_subtitle: "Портфолио и Инновации",
         projects_title: "Флагманские Продукты",
         projects_desc: "Высокопроизводительные сервисы для интерактивных развлечений и объединения мессенджера и социальных сетей.",
@@ -687,6 +1050,8 @@
       AZ: {
         nav_about: "Haqqımızda",
         nav_projects: "Layihələr",
+        nav_arch: "Ekosistem",
+        nav_telemetry: "Canlı Şəbəkə",
         nav_game: "Kiber Oyun",
         nav_founder: "Rəhbərlik",
         nav_contact: "Əlaqə",
@@ -694,7 +1059,10 @@
         hero_title1: "QURURUZ",
         hero_title2: "SOSİAL VƏ OYUN SEKTORUNUN GƏLƏCƏYİNİ",
         hero_sub: "DeLoYGroup — interaktiv oyun platformaları və birləşdirilmiş sosial rabitə şəbəkələri üzrə ixtisaslaşmış müstəqil şirkətdir. Təsisçi: Rafiq Qadırov (deloy).",
-        btn_play_mini: "Oyna Mini-Oyun",
+        btn_app_preview: "Sosial Tətbiq Baxış",
+        arch_subtitle: "Şəbəkə Arxitekturası",
+        arch_title: "DeLoY İnteqrasiya Edilmiş Axın",
+        arch_desc: "Protokolları və məlumat axınını təftiş etmək üçün hər hansı bir qovşağa klikləyin.",
         projects_subtitle: "Portfel və İnnovasiya",
         projects_title: "Əsas Ekosistem Məhsulları",
         projects_desc: "İnteraktiv əyləncə və vahid mobil rabitə üçün yüksək sürətli rəqəmsal təcrübələrin qurulması.",
@@ -727,565 +1095,19 @@
         form_sent_title: "Mesaj Uğurla Göndərildi",
         form_sent_desc: "Təşəkkür edirik! Tezliklə sizinlə əlaqə saxlayacağıq."
       },
-      PT: {
-        nav_about: "Sobre",
-        nav_projects: "Projetos",
-        nav_game: "Jogo Cyber",
-        nav_founder: "Liderança",
-        nav_contact: "Contato",
-        hero_badge: "CRIANDO ECOSSISTEMAS DIGITAIS DE PRÓXIMA GERAÇÃO",
-        hero_title1: "PROJETANDO O",
-        hero_title2: "FUTURO SOCIAL E DE JOGOS",
-        hero_sub: "DeLoYGroup é um conglomerado de tecnologia independente fundado por Rafiq Qadirov (deloy).",
-        btn_play_mini: "Jogar Mini-Game",
-        projects_subtitle: "Portfólio",
-        projects_title: "Produtos Principais",
-        projects_desc: "Construindo experiências digitais de alta velocidade para jogos e comunicação social.",
-        status_in_dev: "Em Desenvolvimento Ativo",
-        project_hybrid_title: "Rede Social e Mensagens Unificadas DeLoY",
-        project_hybrid_desc: "Mensagens estilo WhatsApp unidas com feed e stories estilo Instagram.",
-        project_hybrid_eta: "Lançamento Beta: Q4 2026",
-        btn_join_waitlist: "Entrar na Lista",
-        status_active: "Ativo e Operacional",
-        project_game_title: "Plataforma DeLoYGame",
-        project_game_desc: "Portal de jogos interativos do DeLoYGroup (deloygame.xyz).",
-        btn_explore_game: "Abrir Hub de Jogos",
-        game_title: "DeLoY Cyber Defense Arcade",
-        game_desc: "Pilote a nave DeLoY e destrua os bugs do sistema!",
-        game_score: "PONTOS",
-        game_highscore: "RECORDE",
-        game_restart: "Reiniciar",
-        game_start_btn: "INICIAR JOGO",
-        founder_subtitle: "LIDERANÇA",
-        founder_head: "Rafiq Qadirov (deloy)",
-        founder_title: "FUNDADOR E ARQUITETO CHEFE",
-        founder_bio: "Fundador do DeLoYGroup, Rafiq Qadirov desenvolve ecossistemas web e jogos.",
-        btn_contact_founder: "Contatar Fundador",
-        footer_copy: "© 2026 DeLoYGroup. Fundado por Rafiq Qadirov (deloy).",
-        modal_subtitle: "Mensagem direta para Rafiq Qadirov.",
-        form_name: "NOME",
-        form_email: "EMAIL",
-        form_message: "MENSAGEM",
-        btn_send: "Enviar",
-        form_sent_title: "Mensagem Enviada",
-        form_sent_desc: "Obrigado! Responderemos em breve."
-      },
-      ES: {
-        nav_about: "Nosotros",
-        nav_projects: "Proyectos",
-        nav_game: "Juego Cyber",
-        nav_founder: "Liderazgo",
-        nav_contact: "Contacto",
-        hero_badge: "CREANDO ECOSISTEMAS DIGITALES DE PRÓXIMA GENERACIÓN",
-        hero_title1: "DISEÑANDO EL",
-        hero_title2: "FUTURO SOCIAL Y DE JUEGOS",
-        hero_sub: "DeLoYGroup es un conglomerado tecnológico independiente fundado por Rafiq Qadirov (deloy).",
-        btn_play_mini: "Jugar Mini-Juego",
-        projects_subtitle: "Portafolio",
-        projects_title: "Productos Principales",
-        projects_desc: "Desarrollo de experiencias digitales para entretenimiento y redes sociales.",
-        status_in_dev: "En Desarrollo Activo",
-        project_hybrid_title: "Red Social y Mensajería Unificada DeLoY",
-        project_hybrid_desc: "Combina mensajería instantánea estilo WhatsApp con publicaciones estilo Instagram.",
-        project_hybrid_eta: "Lanzamiento Beta: Q4 2026",
-        btn_join_waitlist: "Unirse a la Lista",
-        status_active: "Activo y Operativo",
-        project_game_title: "Plataforma DeLoYGame",
-        project_game_desc: "Portal de juegos interactivos desarrollado por DeLoYGroup (deloygame.xyz).",
-        btn_explore_game: "Iniciar Centro de Juegos",
-        game_title: "Arcade DeLoY Cyber Defense",
-        game_desc: "¡Pilota la nave DeLoY y destruye los errores del sistema!",
-        game_score: "PUNTOS",
-        game_highscore: "RÉCORD",
-        game_restart: "Reiniciar",
-        game_start_btn: "INICIAR JUEGO",
-        founder_subtitle: "LIDERAZGO",
-        founder_head: "Rafiq Qadirov (deloy)",
-        founder_title: "FUNDADOR Y ARQUITECTO JEFE",
-        founder_bio: "Fundador de DeLoYGroup, Rafiq Qadirov lidera el desarrollo de plataformas web y juegos.",
-        btn_contact_founder: "Contactar al Fundador",
-        footer_copy: "© 2026 DeLoYGroup. Fundado por Rafiq Qadirov (deloy).",
-        modal_subtitle: "Consultas dirigidas a Rafiq Qadirov.",
-        form_name: "NOMBRE",
-        form_email: "EMAIL",
-        form_message: "MENSAJE",
-        btn_send: "Enviar",
-        form_sent_title: "Mensaje Enviado",
-        form_sent_desc: "¡Gracias! Responderemos pronto."
-      },
-      TR: {
-        nav_about: "Hakkımızda",
-        nav_projects: "Projeler",
-        nav_game: "Siber Oyun",
-        nav_founder: "Liderlik",
-        nav_contact: "İletişim",
-        hero_badge: "YENİ NESİL DİJİTAL EKOSİSTEMLER İNŞA EDİYORUZ",
-        hero_title1: "GELECEĞİN",
-        hero_title2: "SOSYAL VE OYUN DÜNYASINI TASARLIYORUZ",
-        hero_sub: "DeLoYGroup, Rafiq Qadirov (deloy) tarafından kurulan bağımsız bir teknoloji şirketidir.",
-        btn_play_mini: "Oyun Oyna",
-        projects_subtitle: "Portföy",
-        projects_title: "Öne Çıkan Ürünler",
-        projects_desc: "Oyun ve sosyal iletişim için yüksek performanslı sistemler.",
-        status_in_dev: "Aktif Geliştirmede",
-        project_hybrid_title: "DeLoY Birleşik Mesajlaşma ve Sosyal Ağ",
-        project_hybrid_desc: "WhatsApp tarzı anlık mesajlaşma ile Instagram tarzı medya akışını birleştirir.",
-        project_hybrid_eta: "Tahmini Beta: Ç4 2026",
-        btn_join_waitlist: "Listeye Katıl",
-        status_active: "Yayında ve Aktif",
-        project_game_title: "DeLoYGame Platformu",
-        project_game_desc: "DeLoYGroup bünyesinde geliştirilen etkileşimli oyun portalı (deloygame.xyz).",
-        btn_explore_game: "Oyun Merkezini Aç",
-        game_title: "DeLoY Siber Savunma Oyunu",
-        game_desc: "DeLoY gemisini yönetin ve sistem hatalarını yok edin!",
-        game_score: "SKOR",
-        game_highscore: "REKOR",
-        game_restart: "Yeniden Başlat",
-        game_start_btn: "OYUNU BAŞLAT",
-        founder_subtitle: "LİDERLİK",
-        founder_head: "Rafiq Qadirov (deloy)",
-        founder_title: "KURUCU VE BAŞ MİMAR",
-        founder_bio: "DeLoYGroup'un kurucusu Rafiq Qadirov (deloy), DeLoYGame oyun portalının baş mimarıdır.",
-        btn_contact_founder: "Kurucu ile İletişim",
-        footer_copy: "© 2026 DeLoYGroup. Kurucu: Rafiq Qadirov (deloy).",
-        modal_subtitle: "Doğrudan Rafiq Qadirov'a iletilir.",
-        form_name: "ADINIZ",
-        form_email: "E-POSTA",
-        form_message: "MESAJINIZ",
-        btn_send: "Gönder",
-        form_sent_title: "Mesaj Gönderildi",
-        form_sent_desc: "Teşekkürler! En kısa sürede dönüş yapacağız."
-      },
-      DE: {
-        nav_about: "Über uns",
-        nav_projects: "Projekte",
-        nav_game: "Cyber Game",
-        nav_founder: "Führung",
-        nav_contact: "Kontakt",
-        hero_badge: "DIGITALE ÖKOSYSTEME DER NÄCHSTEN GENERATION",
-        hero_title1: "ENTWICKLUNG DER",
-        hero_title2: "ZUKUNFT VON SOCIAL & GAMING",
-        hero_sub: "DeLoYGroup ist ein unabhängiges Technologieunternehmen von Rafiq Qadirov (deloy).",
-        btn_play_mini: "Mini-Game Spielen",
-        projects_subtitle: "Portfolio",
-        projects_title: "Flaggschiff-Produkte",
-        projects_desc: "Hochleistungsfähige digitale Lösungen für Unterhaltung und Social Media.",
-        status_in_dev: "In Entwicklung",
-        project_hybrid_title: "DeLoY Messaging & Social Network Hybrid",
-        project_hybrid_desc: "Verbindet Echtzeit-Messaging (WhatsApp) mit Medien-Feeds (Instagram).",
-        project_hybrid_eta: "Beta-Start: Q4 2026",
-        btn_join_waitlist: "Warteliste",
-        status_active: "Live & Operativ",
-        project_game_title: "DeLoYGame Plattform",
-        project_game_desc: "Gaming-Portal von DeLoYGroup (deloygame.xyz).",
-        btn_explore_game: "Game Hub starten",
-        game_title: "DeLoY Cyber Defense Arcade",
-        game_desc: "Steuere das DeLoY-Schiff und zerschieße Systemfehler!",
-        game_score: "SCORE",
-        game_highscore: "REKORD",
-        game_restart: "Neustart",
-        game_start_btn: "SPIEL STARTEN",
-        founder_subtitle: "FÜHRUNG",
-        founder_head: "Rafiq Qadirov (deloy)",
-        founder_title: "GRÜNDER & CHEFARCHITEKT",
-        founder_bio: "Rafiq Qadirov (deloy) ist der Gründer von DeLoYGroup und Entwickler von deloygame.xyz.",
-        btn_contact_founder: "Gründer kontaktieren",
-        footer_copy: "© 2026 DeLoYGroup. Gründer: Rafiq Qadirov (deloy).",
-        modal_subtitle: "Direkte Anfrage an Rafiq Qadirov.",
-        form_name: "NAME",
-        form_email: "E-MAIL",
-        form_message: "NACHRICHT",
-        btn_send: "Senden",
-        form_sent_title: "Erfolgreich gesendet",
-        form_sent_desc: "Vielen Dank! Wir melden uns in Kürze."
-      },
-      FR: {
-        nav_about: "À propos",
-        nav_projects: "Projets",
-        nav_game: "Jeu Cyber",
-        nav_founder: "Direction",
-        nav_contact: "Contact",
-        hero_badge: "ÉCOSYSTÈMES NUMÉRIQUES DE NOUVELLE GÉNÉRATION",
-        hero_title1: "CONCEVOIR L'AVENIR",
-        hero_title2: "DU JEU ET DES RÉSEAUX SOCIAUX",
-        hero_sub: "DeLoYGroup est un groupe technologique indépendant fondé par Rafiq Qadirov (deloy).",
-        btn_play_mini: "Jouer au Mini-Jeu",
-        projects_subtitle: "Portfolio",
-        projects_title: "Produits Phares",
-        projects_desc: "Expériences numériques pour le jeu et les réseaux sociaux.",
-        status_in_dev: "En Développement",
-        project_hybrid_title: "Réseau Social & Messagerie Unifiée DeLoY",
-        project_hybrid_desc: "Combine messagerie instantanée (WhatsApp) et flux multimédia (Instagram).",
-        project_hybrid_eta: "Lancement Bêta: Q4 2026",
-        btn_join_waitlist: "Rejoindre la liste",
-        status_active: "En Ligne",
-        project_game_title: "Plateforme DeLoYGame",
-        project_game_desc: "Portail de jeux interactifs (deloygame.xyz).",
-        btn_explore_game: "Ouvrir le Hub de Jeu",
-        game_title: "Arcade DeLoY Cyber Defense",
-        game_desc: "Pilotez le vaisseau DeLoY et détruisez les bugs système!",
-        game_score: "SCORE",
-        game_highscore: "MEILLEUR",
-        game_restart: "Recommencer",
-        game_start_btn: "JOUER",
-        founder_subtitle: "DIRECTION",
-        founder_head: "Rafiq Qadirov (deloy)",
-        founder_title: "FONDATEUR & ARCHITECTE EN CHEF",
-        founder_bio: "Fondateur de DeLoYGroup, Rafiq Qadirov conçoit deloygame.xyz et des applications sociales.",
-        btn_contact_founder: "Contacter le Fondateur",
-        footer_copy: "© 2026 DeLoYGroup. Fondé par Rafiq Qadirov (deloy).",
-        modal_subtitle: "Message direct à Rafiq Qadirov.",
-        form_name: "NOM",
-        form_email: "EMAIL",
-        form_message: "MESSAGE",
-        btn_send: "Envoyer",
-        form_sent_title: "Message Envoyé",
-        form_sent_desc: "Merci! Nous vous répondrons rapidement."
-      },
-      IT: {
-        nav_about: "Chi Siamo",
-        nav_projects: "Progetti",
-        nav_game: "Gioco Cyber",
-        nav_founder: "Leadership",
-        nav_contact: "Contatti",
-        hero_badge: "ECOSISTEMI DIGITALI DI NUOVA GENERAZIONE",
-        hero_title1: "PROGETTIAMO IL",
-        hero_title2: "FUTURO DEL GAMING E SOCIAL",
-        hero_sub: "DeLoYGroup è una società tecnologica fondata da Rafiq Qadirov (deloy).",
-        btn_play_mini: "Gioca al Mini-Gioco",
-        projects_subtitle: "Portfolio",
-        projects_title: "Prodotti Principali",
-        projects_desc: "Soluzioni digitali per intrattenimento e comunicazione mobile.",
-        status_in_dev: "In Sviluppo",
-        project_hybrid_title: "App Sociale Unificata DeLoY",
-        project_hybrid_desc: "Messaggistica istantanea (WhatsApp) e feed multimediali (Instagram).",
-        project_hybrid_eta: "Lancio Beta: Q4 2026",
-        btn_join_waitlist: "Unisciti alla Lista",
-        status_active: "Attivo",
-        project_game_title: "Piattaforma DeLoYGame",
-        project_game_desc: "Portale di gioco sviluppato da DeLoYGroup (deloygame.xyz).",
-        btn_explore_game: "Avvia Game Hub",
-        game_title: "DeLoY Cyber Defense Arcade",
-        game_desc: "Pilota la navicella DeLoY e distruggi i bug di sistema!",
-        game_score: "PUNTI",
-        game_highscore: "RECORD",
-        game_restart: "Riavvia",
-        game_start_btn: "INIZIA GIOCO",
-        founder_subtitle: "LEADERSHIP",
-        founder_head: "Rafiq Qadirov (deloy)",
-        founder_title: "FONDATORE & CHIEF ARCHITECT",
-        founder_bio: "Rafiq Qadirov (deloy) guida lo sviluppo di DeLoYGroup.",
-        btn_contact_founder: "Contatta il Fondatore",
-        footer_copy: "© 2026 DeLoYGroup. Fondato da Rafiq Qadirov (deloy).",
-        modal_subtitle: "Messaggio diretto a Rafiq Qadirov.",
-        form_name: "NOME",
-        form_email: "EMAIL",
-        form_message: "MESSAGGIO",
-        btn_send: "Invia",
-        form_sent_title: "Messaggio Inviato",
-        form_sent_desc: "Grazie! Ti risponderemo al più presto."
-      },
-      ZH: {
-        nav_about: "关于我们",
-        nav_projects: "项目",
-        nav_game: "小游戏",
-        nav_founder: "创始人",
-        nav_contact: "联系我们",
-        hero_badge: "构建下一代数字生态系统",
-        hero_title1: "重塑",
-        hero_title2: "社交与游戏娱乐的未来",
-        hero_sub: "DeLoYGroup 是一家独立高科技企业，由 Rafiq Qadirov (deloy) 创立。",
-        btn_play_mini: "试玩小游戏",
-        projects_subtitle: "产品组合",
-        projects_title: "核心生态产品",
-        projects_desc: "为互动娱乐与移动即时通讯打造高吞吐量数字体验。",
-        status_in_dev: "积极研发中",
-        project_hybrid_title: "DeLoY 融合即时通讯与社交网络",
-        project_hybrid_desc: "结合 WhatsApp 风格即时聊天与 Instagram 风格动态/故事。",
-        project_hybrid_eta: "预计 Beta 测试: 2026年Q4",
-        btn_join_waitlist: "加入等候名单",
-        status_active: "已上线运行",
-        project_game_title: "DeLoYGame 游戏平台",
-        project_game_desc: "DeLoYGroup 旗下互动游戏门户 (deloygame.xyz)。",
-        btn_explore_game: "进入游戏中心",
-        game_title: "DeLoY 赛博防御街机",
-        game_desc: "操控 DeLoY 战舰，击落入侵系统的 Bug 吧！",
-        game_score: "得分",
-        game_highscore: "最高分",
-        game_restart: "重新开始",
-        game_start_btn: "开始游戏",
-        founder_subtitle: "领导力",
-        founder_head: "Rafiq Qadirov (deloy)",
-        founder_title: "创始人兼首席架构师",
-        founder_bio: "Rafiq Qadirov (deloy) 是 DeLoYGroup 及 deloygame.xyz 的创始人与架构师。",
-        btn_contact_founder: "联系创始人",
-        footer_copy: "© 2026 DeLoYGroup. 创始人: Rafiq Qadirov (deloy).",
-        modal_subtitle: "信息将直接发送至 Rafiq Qadirov。",
-        form_name: "姓名",
-        form_email: "邮箱",
-        form_message: "留言",
-        btn_send: "发送",
-        form_sent_title: "发送成功",
-        form_sent_desc: "感谢您的留言，我们将尽快回复。"
-      },
-      JA: {
-        nav_about: "概要",
-        nav_projects: "プロジェクト",
-        nav_game: "ミニゲーム",
-        nav_founder: "創業者",
-        nav_contact: "お問い合わせ",
-        hero_badge: "次世代デジタルエコシステムの構築",
-        hero_title1: "ソーシャルとゲームの",
-        hero_title2: "未来を設計する",
-        hero_sub: "DeLoYGroupは、Rafiq Qadirov (deloy) によって設立された独立系IT企業です。",
-        btn_play_mini: "ミニゲームをプレイ",
-        projects_subtitle: "ポートフォリオ",
-        projects_title: "フラッグシップ製品",
-        projects_desc: "エンターテインメントとコミュニケーションの統合ソリューション。",
-        status_in_dev: "開発中",
-        project_hybrid_title: "DeLoY 統合メッセージ＆SNSアプリ",
-        project_hybrid_desc: "WhatsApp風リアルタイムチャットとInstagram風フィードの融合。",
-        project_hybrid_eta: "ベータ版予定: 2026年Q4",
-        btn_join_waitlist: "リストに登録",
-        status_active: "運用中",
-        project_game_title: "DeLoYGame プラットフォーム",
-        project_game_desc: "DeLoYGroupの手掛けるゲームポータル (deloygame.xyz)。",
-        btn_explore_game: "ゲームハブを開く",
-        game_title: "DeLoY サイバーディフェンス Arcade",
-        game_desc: "DeLoY艦を操作して、システムバグを撃ち落とせ！",
-        game_score: "スコア",
-        game_highscore: "ハイスコア",
-        game_restart: "リトライ",
-        game_start_btn: "ゲームスタート",
-        founder_subtitle: "リーダーシップ",
-        founder_head: "Rafiq Qadirov (deloy)",
-        founder_title: "創業者 & チーフアーキテクト",
-        founder_bio: "Rafiq Qadirov (deloy) は DeLoYGroup および deloygame.xyz の創業者です。",
-        btn_contact_founder: "創業者に連絡",
-        footer_copy: "© 2026 DeLoYGroup. 創業者: Rafiq Qadirov (deloy).",
-        modal_subtitle: "Rafiq Qadirovへ直接送信されます。",
-        form_name: "お名前",
-        form_email: "メール",
-        form_message: "メッセージ",
-        btn_send: "送信する",
-        form_sent_title: "送信完了",
-        form_sent_desc: "お問い合わせありがとうございます。"
-      },
-      AR: {
-        nav_about: "عن الشركة",
-        nav_projects: "المشاريع",
-        nav_game: "لعبة إلكترونية",
-        nav_founder: "القيادة",
-        nav_contact: "اتصل بنا",
-        hero_badge: "بناء الأنظمة الرقمية للجيل القادم",
-        hero_title1: "صياغة مستقبل",
-        hero_title2: "التواصل الاجتماعي والألعاب",
-        hero_sub: "DeLoYGroup هي مجموعة تكنولوجية مستقلة أسسها رفيق قديروف (deloy).",
-        btn_play_mini: "العب اللعبة المصغرة",
-        projects_subtitle: "المشاريع",
-        projects_title: "المنتجات الرئيسية",
-        projects_desc: "تطوير تجارب رقمية للألعاب والتواصل الاجتماعي.",
-        status_in_dev: "قيد التطوير النشط",
-        project_hybrid_title: "تطبيق DeLoY الموحد للمراسلة والتواصل الاجتماعي",
-        project_hybrid_desc: "يدمج بين المراسلة الفورية (WhatsApp) ومنشورات الميديا والقصص (Instagram).",
-        project_hybrid_eta: "الإطلاق التجريبي المتوقع: Q4 2026",
-        btn_join_waitlist: "الانضمام إلى القائمة",
-        status_active: "يعمل حالياً",
-        project_game_title: "منصة DeLoYGame",
-        project_game_desc: "بوابة ألعاب تفاعلية تم تطويرها بواسطة DeLoYGroup (deloygame.xyz).",
-        btn_explore_game: "تشغيل مركز الألعاب",
-        game_title: "لعبة DeLoY للدفـاع الإلكتروني",
-        game_desc: "قد سفينة DeLoY ودمر أخطاء النظام القادمة!",
-        game_score: "النقاط",
-        game_highscore: "أعلى نتيجة",
-        game_restart: "إعادة التشغيل",
-        game_start_btn: "ابدأ اللعبة",
-        founder_subtitle: "القيادة",
-        founder_head: "رفيق قديروف (deloy)",
-        founder_title: "المؤسس والرئيس التنفيذي للتقنية",
-        founder_bio: "يقود رفيق قديروف (deloy) تصميم وتطوير DeLoYGame ومشاريع DeLoYGroup.",
-        btn_contact_founder: "التواصل مع المؤسس",
-        footer_copy: "© 2026 DeLoYGroup. المؤسس: رفيق قديروف (deloy).",
-        modal_subtitle: "يتم إرسال الرسائل مباشرة إلى رفيق قديروف.",
-        form_name: "الاسم",
-        form_email: "البريد الإلكتروني",
-        form_message: "الرسالة",
-        btn_send: "إرسال الرسالة",
-        form_sent_title: "تم الإرسال بنجاح",
-        form_sent_desc: "شكراً لك! سيتواصل معك الفريق قريباً."
-      },
-      HI: {
-        nav_about: "हमारे बारे में",
-        nav_projects: "प्रोजेक्ट्स",
-        nav_game: "साइबर गेम",
-        nav_founder: "नेतृत्व",
-        nav_contact: "संपर्क करें",
-        hero_badge: "अगली पीढ़ी के डिजिटल इकोसिस्टम का निर्माण",
-        hero_title1: "गेमिंग और सोशल के",
-        hero_title2: "भविष्य का निर्माण",
-        hero_sub: "DeLoYGroup एक स्वतंत्र तकनीक कंपनी है जिसे रफीक कादिरोव (deloy) ने स्थापित किया है।",
-        btn_play_mini: "मिनी-गेम खेलें",
-        projects_subtitle: "पोर्टफोलियो",
-        projects_title: "प्रमुख उत्पाद",
-        projects_desc: "गेमिंग और सोशल कम्युनिकेशन के लिए उच्च प्रदर्शन उत्पाद।",
-        status_in_dev: "सक्रिय विकास में",
-        project_hybrid_title: "DeLoY यूनिफाइड मैसेजिंग और सोशल नेटवर्क",
-        project_hybrid_desc: "WhatsApp मैसेजिंग और Instagram स्टोरीज़ का संयोजन।",
-        project_hybrid_eta: "बीटा लॉन्च: Q4 2026",
-        btn_join_waitlist: "वेटलिस्ट में शामिल हों",
-        status_active: "सक्रिय और लाइव",
-        project_game_title: "DeLoYGame प्लेटफॉर्म",
-        project_game_desc: "DeLoYGroup द्वारा विकसित गेमिंग पोर्टल (deloygame.xyz)।",
-        btn_explore_game: "गेम हब खोलें",
-        game_title: "DeLoY साइबर डिफेंस आर्केड",
-        game_desc: "DeLoY जहाज़ चलाएं और सिस्टम बग को नष्ट करें!",
-        game_score: "स्कोर",
-        game_highscore: "बेस्ट स्कोर",
-        game_restart: "दोबारा शुरू करें",
-        game_start_btn: "गेम शुरू करें",
-        founder_subtitle: "नेतृत्व",
-        founder_head: "रफीक कादिरोव (deloy)",
-        founder_title: "संस्थापक और मुख्य आर्किटेक्ट",
-        founder_bio: "रफीक कादिरोव (deloy) DeLoYGroup और deloygame.xyz के संस्थापक हैं।",
-        btn_contact_founder: "संस्थापक से संपर्क करें",
-        footer_copy: "© 2026 DeLoYGroup. संस्थापक: रफीक कादिरोव (deloy)।",
-        modal_subtitle: "रफीक कादिरोव को सीधा संदेश भेजें।",
-        form_name: "आपका नाम",
-        form_email: "ईमेल",
-        form_message: "संदेश",
-        btn_send: "संदेश भेजें",
-        form_sent_title: "संदेश सफलतापूर्वक भेजा गया",
-        form_sent_desc: "धन्यवाद! हम जल्द ही संपर्क करेंगे।"
-      },
-      KO: {
-        nav_about: "소개",
-        nav_projects: "프로젝트",
-        nav_game: "사이버 게임",
-        nav_founder: "리더십",
-        nav_contact: "문의하기",
-        hero_badge: "차세대 디지털 생태계 구축",
-        hero_title1: "소셜과 게이밍의",
-        hero_title2: "미래를 설계하다",
-        hero_sub: "DeLoYGroup은 Rafiq Qadirov (deloy)가 설립한 독립 기술 기업입니다.",
-        btn_play_mini: "미니게임 플레이",
-        projects_subtitle: "포트폴리오",
-        projects_title: "주요 플랫폼",
-        projects_desc: "차세대 엔터테인먼트 및 소셜 소통을 위한 솔루션.",
-        status_in_dev: "개발 진행 중",
-        project_hybrid_title: "DeLoY 통합 메신저 & 소셜 네트워크",
-        project_hybrid_desc: "WhatsApp 메신저와 Instagram 미디어 피드의 결합.",
-        project_hybrid_eta: "베타 예정: 2026년 Q4",
-        btn_join_waitlist: "대기 등록",
-        status_active: "라이브 운영 중",
-        project_game_title: "DeLoYGame 플랫폼",
-        project_game_desc: "DeLoYGroup에서 개발한 게임 포털 (deloygame.xyz).",
-        btn_explore_game: "게임 허브 열기",
-        game_title: "DeLoY 사이버 디펜스 아케이드",
-        game_desc: "DeLoY 우주선을 조종하여 버그를 격추하세요!",
-        game_score: "점수",
-        game_highscore: "최고 점수",
-        game_restart: "재시작",
-        game_start_btn: "게임 시작",
-        founder_subtitle: "리더십",
-        founder_head: "Rafiq Qadirov (deloy)",
-        founder_title: "창립자 & 수석 아키텍트",
-        founder_bio: "Rafiq Qadirov (deloy)는 DeLoYGroup 및 deloygame.xyz의 창립자입니다.",
-        btn_contact_founder: "창립자에게 문의",
-        footer_copy: "© 2026 DeLoYGroup. 창립자: Rafiq Qadirov (deloy).",
-        modal_subtitle: "Rafiq Qadirov에게 직접 전달됩니다.",
-        form_name: "이름",
-        form_email: "이메일",
-        form_message: "메시지",
-        btn_send: "보내기",
-        form_sent_title: "전송 완료",
-        form_sent_desc: "감사합니다. 빠른 답변드리겠습니다."
-      },
-      PL: {
-        nav_about: "O nas",
-        nav_projects: "Projekty",
-        nav_game: "Gra Cyber",
-        nav_founder: "Liderzy",
-        nav_contact: "Kontakt",
-        hero_badge: "TWORZENIE EKOSYSTEMÓW CYFROWYCH NOWEJ GENERACJI",
-        hero_title1: "PROJEKTUJEMY",
-        hero_title2: "PRZYSZŁOŚĆ SOCIAL I GAMINGU",
-        hero_sub: "DeLoYGroup to niezależna firma technologiczna założona przez Rafiq Qadirov (deloy).",
-        btn_play_mini: "Zagraj w Mini-Grę",
-        projects_subtitle: "Portfolio",
-        projects_title: "Główne Produkty",
-        projects_desc: "Rozwiązania cyfrowe dla rozrywki i komunikacji mobilnej.",
-        status_in_dev: "W trakcie rozwoju",
-        project_hybrid_title: "Połączona Aplikacja DeLoY (Messanger + Social)",
-        project_hybrid_desc: "Połączenie czatu (WhatsApp) i relacji (Instagram).",
-        project_hybrid_eta: "Szacowane Beta: Q4 2026",
-        btn_join_waitlist: "Dołącz do listy",
-        status_active: "Aktywny i Działa",
-        project_game_title: "Platforma DeLoYGame",
-        project_game_desc: "Portal gier interaktywnych DeLoYGroup (deloygame.xyz).",
-        btn_explore_game: "Otwórz Centrum Gier",
-        game_title: "Arcade DeLoY Cyber Defense",
-        game_desc: "Steruj statkiem DeLoY i niszcz błędy systemowe!",
-        game_score: "PUNKTY",
-        game_highscore: "REKORD",
-        game_restart: "Restart",
-        game_start_btn: "START",
-        founder_subtitle: "LIDERZY",
-        founder_head: "Rafiq Qadirov (deloy)",
-        founder_title: "ZAŁOŻYCIEL I GŁÓWNY ARCHITEKT",
-        founder_bio: "Założyciel DeLoYGroup i deloygame.xyz.",
-        btn_contact_founder: "Skontaktuj się",
-        footer_copy: "© 2026 DeLoYGroup. Założyciel: Rafiq Qadirov (deloy).",
-        modal_subtitle: "Wiadomość trafi do Rafika Qadirova.",
-        form_name: "IMIĘ",
-        form_email: "EMAIL",
-        form_message: "WIADOMOŚĆ",
-        btn_send: "Wyślij",
-        form_sent_title: "Wysłano",
-        form_sent_desc: "Dziękujemy! Odpowiemy wkrótce."
-      },
-      UK: {
-        nav_about: "Про нас",
-        nav_projects: "Проєкти",
-        nav_game: "Кібер-Гра",
-        nav_founder: "Керівництво",
-        nav_contact: "Контакти",
-        hero_badge: "СТВОРЕННЯ ЦИФРОВИХ ЕКОСИСТЕМ НОВОГО ПОКОЛІННЯ",
-        hero_title1: "ПРОЄКТУЄМО",
-        hero_title2: "МАЙБУТНЄ СОЦМЕРЕЖ ТА ГЕЙМІНГУ",
-        hero_sub: "DeLoYGroup — незалежна технологічна компанія, заснована Рафіком Кадіровим (deloy).",
-        btn_play_mini: "Грати в Міні-Гру",
-        projects_subtitle: "Портфоліо",
-        projects_title: "Основні Продукти",
-        projects_desc: "Високопродуктивні рішення для геймінгу та мобільного зв'язку.",
-        status_in_dev: "В активній розробці",
-        project_hybrid_title: "Гібридний Месенджер + Соцмережа DeLoY",
-        project_hybrid_desc: "Поєднання чату (WhatsApp) та медіа-стрічки (Instagram).",
-        project_hybrid_eta: "Бета-запуск: Q4 2026",
-        btn_join_waitlist: "Приєднатися",
-        status_active: "Працює",
-        project_game_title: "Ігрова Платформа DeLoYGame",
-        project_game_desc: "Ігровий портал від DeLoYGroup (deloygame.xyz).",
-        btn_explore_game: "Запустити Ігровий Хаб",
-        game_title: "Аркада DeLoY Cyber Defense",
-        game_desc: "Керуйте кораблем DeLoY та знищуйте системні збої!",
-        game_score: "РАХУНОК",
-        game_highscore: "РЕКОРД",
-        game_restart: "Перезапуск",
-        game_start_btn: "ПОЧАТИ ГРУ",
-        founder_subtitle: "КЕРІВНИЦТВО",
-        founder_head: "Рафік Кадіров (deloy)",
-        founder_title: "ЗАСНОВНИК ТА ГОЛОВНИЙ АРХИТЕКТОР",
-        founder_bio: "Засновник DeLoYGroup та розробник deloygame.xyz.",
-        btn_contact_founder: "Зв'язатися з Засновником",
-        footer_copy: "© 2026 DeLoYGroup. Засновник: Рафік Кадіров (deloy).",
-        modal_subtitle: "Надсилається безпосередньо Рафіку Кадірову.",
-        form_name: "ІМ'Я",
-        form_email: "EMAIL",
-        form_message: "ПОВІДОМЛЕННЯ",
-        btn_send: "Надіслати",
-        form_sent_title: "Успішно Надіслано",
-        form_sent_desc: "Дякуємо! Зв'яжемося найближчим часом."
-      }
+      PT: { nav_about: "Sobre", nav_projects: "Projetos", nav_arch: "Ecossistema", nav_telemetry: "Rede", nav_game: "Jogo", nav_founder: "Liderança", nav_contact: "Contato", hero_badge: "CRIANDO ECOSSISTEMAS DIGITAIS", hero_title1: "PROJETANDO O", hero_title2: "FUTURO SOCIAL E DE JOGOS", hero_sub: "DeLoYGroup é um conglomerado de tecnologia independente fundado por Rafiq Qadirov (deloy).", btn_app_preview: "Ver Mockup do App", projects_subtitle: "Portfólio", projects_title: "Produtos Principais", projects_desc: "Experiências digitais de alta velocidade.", status_in_dev: "Em Desenvolvimento", project_hybrid_title: "Rede Social e Mensagens Unificadas", project_hybrid_desc: "WhatsApp + Instagram hybrid app.", project_hybrid_eta: "Beta: Q4 2026", btn_join_waitlist: "Entrar na Lista", status_active: "Ativo", project_game_title: "Plataforma DeLoYGame", project_game_desc: "Portal de jogos interativos.", btn_explore_game: "Abrir Hub", game_title: "DeLoY Cyber Defense", game_desc: "Pilote a nave DeLoY e destrua os bugs!", game_score: "PONTOS", game_highscore: "RECORDE", game_restart: "Reiniciar", game_start_btn: "INICIAR JOGO", founder_subtitle: "LIDERANÇA", founder_head: "Rafiq Qadirov (deloy)", founder_title: "FUNDADOR", founder_bio: "Fundador do DeLoYGroup.", btn_contact_founder: "Contatar Fundador", footer_copy: "© 2026 DeLoYGroup. Fundado por Rafiq Qadirov (deloy).", modal_subtitle: "Direto para Rafiq Qadirov.", form_name: "NOME", form_email: "EMAIL", form_message: "MENSAGEM", btn_send: "Enviar", form_sent_title: "Enviado", form_sent_desc: "Obrigado!" },
+      ES: { nav_about: "Nosotros", nav_projects: "Proyectos", nav_arch: "Ecosistema", nav_telemetry: "Red Live", nav_game: "Juego", nav_founder: "Liderazgo", nav_contact: "Contacto", hero_badge: "CREANDO ECOSISTEMAS DIGITALES", hero_title1: "DISEÑANDO EL", hero_title2: "FUTURO SOCIAL Y DE JUEGOS", hero_sub: "DeLoYGroup es un conglomerado tecnológico fundado por Rafiq Qadirov (deloy).", btn_app_preview: "Vista de App", projects_subtitle: "Portafolio", projects_title: "Productos Principales", projects_desc: "Experiencias digitales para juegos y redes sociales.", status_in_dev: "En Desarrollo", project_hybrid_title: "Red Social Unificada DeLoY", project_hybrid_desc: "Mensajería estilo WhatsApp con feeds estilo Instagram.", project_hybrid_eta: "Beta: Q4 2026", btn_join_waitlist: "Unirse a la Lista", status_active: "Activo", project_game_title: "Plataforma DeLoYGame", project_game_desc: "Portal de juegos interactivos.", btn_explore_game: "Iniciar Hub", game_title: "DeLoY Cyber Defense", game_desc: "¡Pilota la nave y destruye errores!", game_score: "PUNTOS", game_highscore: "RÉCORD", game_restart: "Reiniciar", game_start_btn: "INICIAR JUEGO", founder_subtitle: "LIDERAZGO", founder_head: "Rafiq Qadirov (deloy)", founder_title: "FUNDADOR", founder_bio: "Fundador de DeLoYGroup.", btn_contact_founder: "Contactar", footer_copy: "© 2026 DeLoYGroup. Fundado por Rafiq Qadirov.", modal_subtitle: "Directo a Rafiq Qadirov.", form_name: "NOMBRE", form_email: "EMAIL", form_message: "MENSAJE", btn_send: "Enviar", form_sent_title: "Enviado", form_sent_desc: "¡Gracias!" },
+      TR: { nav_about: "Hakkımızda", nav_projects: "Projeler", nav_arch: "Ekosistem", nav_telemetry: "Ağ", nav_game: "Oyun", nav_founder: "Liderlik", nav_contact: "İletişim", hero_badge: "YENİ NESİL DİJİTAL EKOSİSTEMLER", hero_title1: "GELECEĞİN", hero_title2: "SOSYAL VE OYUN DÜNYASI", hero_sub: "DeLoYGroup, Rafiq Qadirov (deloy) tarafından kurulan teknoloji şirketidir.", btn_app_preview: "Uygulama Önizleme", projects_subtitle: "Portföy", projects_title: "Öne Çıkan Ürünler", projects_desc: "Yüksek performanslı dijital sistemler.", status_in_dev: "Aktif Geliştirmede", project_hybrid_title: "DeLoY Birleşik Sosyal Ağ", project_hybrid_desc: "WhatsApp mesajlaşma + Instagram akışı.", project_hybrid_eta: "Beta: Ç4 2026", btn_join_waitlist: "Listeye Katıl", status_active: "Yayında", project_game_title: "DeLoYGame Platformu", project_game_desc: "Etkileşimli oyun portalı.", btn_explore_game: "Oyun Hub'ı", game_title: "DeLoY Siber Savunma", game_desc: "Sistem hatalarını yok edin!", game_score: "SKOR", game_highscore: "REKOR", game_restart: "Yeniden Başlat", game_start_btn: "BAŞLAT", founder_subtitle: "LİDERLİK", founder_head: "Rafiq Qadirov (deloy)", founder_title: "KURUCU", founder_bio: "DeLoYGroup'un kurucusu.", btn_contact_founder: "İletişime Geç", footer_copy: "© 2026 DeLoYGroup. Kurucu: Rafiq Qadirov.", modal_subtitle: "Rafiq Qadirov'a iletilir.", form_name: "ADINIZ", form_email: "E-POSTA", form_message: "MESAJINIZ", btn_send: "Gönder", form_sent_title: "Gönderildi", form_sent_desc: "Teşekkürler!" },
+      DE: { nav_about: "Über uns", nav_projects: "Projekte", nav_arch: "Ökosystem", nav_telemetry: "Netzwerk", nav_game: "Spiel", nav_founder: "Führung", nav_contact: "Kontakt", hero_badge: "DIGITALE ÖKOSYSTEME", hero_title1: "ENTWICKLUNG DER", hero_title2: "ZUKUNFT VON SOCIAL & GAMING", hero_sub: "Unabhängiges Technologieunternehmen von Rafiq Qadirov (deloy).", btn_app_preview: "App Vorschau", projects_subtitle: "Portfolio", projects_title: "Flaggschiff-Produkte", projects_desc: "Digitale Lösungen für Unterhaltung.", status_in_dev: "In Entwicklung", project_hybrid_title: "DeLoY Social & Messaging Hybrid", project_hybrid_desc: "WhatsApp Chat + Instagram Feed.", project_hybrid_eta: "Beta: Q4 2026", btn_join_waitlist: "Warteliste", status_active: "Live", project_game_title: "DeLoYGame Plattform", project_game_desc: "Gaming-Portal.", btn_explore_game: "Hub starten", game_title: "DeLoY Cyber Defense", game_desc: "Zerschieße Systemfehler!", game_score: "SCORE", game_highscore: "REKORD", game_restart: "Neustart", game_start_btn: "STARTEN", founder_subtitle: "FÜHRUNG", founder_head: "Rafiq Qadirov (deloy)", founder_title: "GRÜNDER", founder_bio: "Gründer von DeLoYGroup.", btn_contact_founder: "Kontaktieren", footer_copy: "© 2026 DeLoYGroup. Gründer: Rafiq Qadirov.", modal_subtitle: "Anfrage an Rafiq Qadirov.", form_name: "NAME", form_email: "E-MAIL", form_message: "NACHRICHT", btn_send: "Senden", form_sent_title: "Gesendet", form_sent_desc: "Vielen Dank!" },
+      FR: { nav_about: "À propos", nav_projects: "Projets", nav_arch: "Écosystème", nav_telemetry: "Réseau Live", nav_game: "Jeu Cyber", nav_founder: "Direction", nav_contact: "Contact", hero_badge: "ÉCOSYSTÈMES NUMÉRIQUES", hero_title1: "CONCEVOIR L'AVENIR", hero_title2: "DU JEU ET DES RÉSEAUX SOCIAUX", hero_sub: "DeLoYGroup est fondé par Rafiq Qadirov (deloy).", btn_app_preview: "Aperçu de l'App", projects_subtitle: "Portfolio", projects_title: "Produits Phares", projects_desc: "Expériences numériques pour le jeu.", status_in_dev: "En Développement", project_hybrid_title: "Réseau Social Unifié DeLoY", project_hybrid_desc: "Messagerie instantanée + Flux média.", project_hybrid_eta: "Bêta: Q4 2026", btn_join_waitlist: "Rejoindre", status_active: "En Ligne", project_game_title: "Plateforme DeLoYGame", project_game_desc: "Portail de jeux interactifs.", btn_explore_game: "Ouvrir le Hub", game_title: "DeLoY Cyber Defense", game_desc: "Détruisez les bugs système!", game_score: "SCORE", game_highscore: "MEILLEUR", game_restart: "Recommencer", game_start_btn: "JOUER", founder_subtitle: "DIRECTION", founder_head: "Rafiq Qadirov (deloy)", founder_title: "FONDATEUR", founder_bio: "Fondateur de DeLoYGroup.", btn_contact_founder: "Contacter", footer_copy: "© 2026 DeLoYGroup. Fondé par Rafiq Qadirov.", modal_subtitle: "Direct à Rafiq Qadirov.", form_name: "NOM", form_email: "EMAIL", form_message: "MESSAGE", btn_send: "Envoyer", form_sent_title: "Envoyé", form_sent_desc: "Merci!" },
+      IT: { nav_about: "Chi Siamo", nav_projects: "Progetti", nav_arch: "Ecosistema", nav_telemetry: "Rete Live", nav_game: "Gioco", nav_founder: "Leadership", nav_contact: "Contatti", hero_badge: "ECOSISTEMI DIGITALI", hero_title1: "PROGETTIAMO IL", hero_title2: "FUTURO DEL GAMING E SOCIAL", hero_sub: "Fondato da Rafiq Qadirov (deloy).", btn_app_preview: "Anteprima App", projects_subtitle: "Portfolio", projects_title: "Prodotti Principali", projects_desc: "Soluzioni digitali avanzate.", status_in_dev: "In Sviluppo", project_hybrid_title: "App Sociale Unificata DeLoY", project_hybrid_desc: "Messaggistica WhatsApp + Feed Instagram.", project_hybrid_eta: "Beta: Q4 2026", btn_join_waitlist: "Lista d'attesa", status_active: "Attivo", project_game_title: "Piattaforma DeLoYGame", project_game_desc: "Portale di gioco.", btn_explore_game: "Avvia Hub", game_title: "DeLoY Cyber Defense", game_desc: "Distruggi i bug di sistema!", game_score: "PUNTI", game_highscore: "RECORD", game_restart: "Riavvia", game_start_btn: "INIZIA", founder_subtitle: "LEADERSHIP", founder_head: "Rafiq Qadirov (deloy)", founder_title: "FONDATORE", founder_bio: "Fondatore di DeLoYGroup.", btn_contact_founder: "Contatta", footer_copy: "© 2026 DeLoYGroup. Fondato da Rafiq Qadirov.", modal_subtitle: "Diretto a Rafiq Qadirov.", form_name: "NOME", form_email: "EMAIL", form_message: "MESSAGGIO", btn_send: "Invia", form_sent_title: "Inviato", form_sent_desc: "Grazie!" },
+      ZH: { nav_about: "关于我们", nav_projects: "项目", nav_arch: "架构生态", nav_telemetry: "实时网络", nav_game: "小游戏", nav_founder: "创始人", nav_contact: "联系我们", hero_badge: "构建下一代数字生态系统", hero_title1: "重塑", hero_title2: "社交与游戏娱乐的未来", hero_sub: "由 Rafiq Qadirov (deloy) 创立的高科技企业。", btn_app_preview: "预览社交 App", projects_subtitle: "产品组合", projects_title: "核心生态产品", projects_desc: "打造高吞吐量数字体验。", status_in_dev: "积极研发中", project_hybrid_title: "DeLoY 融合即时通讯与社交网络", project_hybrid_desc: "WhatsApp 聊天 + Instagram 动态。", project_hybrid_eta: "Beta 测试: 2026年Q4", btn_join_waitlist: "加入等候名单", status_active: "已上线", project_game_title: "DeLoYGame 游戏平台", project_game_desc: "互动游戏门户 (deloygame.xyz)。", btn_explore_game: "进入游戏中心", game_title: "DeLoY 赛博防御街机", game_desc: "击落入侵系统的 Bug！", game_score: "得分", game_highscore: "最高分", game_restart: "重新开始", game_start_btn: "开始游戏", founder_subtitle: "领导力", founder_head: "Rafiq Qadirov (deloy)", founder_title: "创始人兼首席架构师", founder_bio: "DeLoYGroup 及 deloygame.xyz 创始人。", btn_contact_founder: "联系创始人", footer_copy: "© 2026 DeLoYGroup. 创始人: Rafiq Qadirov.", modal_subtitle: "直接发送至 Rafiq Qadirov。", form_name: "姓名", form_email: "邮箱", form_message: "留言", btn_send: "发送", form_sent_title: "发送成功", form_sent_desc: "感谢您的留言。" },
+      JA: { nav_about: "概要", nav_projects: "プロジェクト", nav_arch: "エコシステム", nav_telemetry: "ライブ通信", nav_game: "ミニゲーム", nav_founder: "創業者", nav_contact: "お問い合わせ", hero_badge: "次世代デジタルエコシステム", hero_title1: "ソーシャルとゲームの", hero_title2: "未来を設計する", hero_sub: "Rafiq Qadirov (deloy) によって設立されたIT企業。", btn_app_preview: "ハイブリッドAppプレビュー", projects_subtitle: "ポートフォリオ", projects_title: "フラッグシップ製品", projects_desc: "エンターテインメント統合ソリューション。", status_in_dev: "開発中", project_hybrid_title: "DeLoY 統合メッセージ＆SNSアプリ", project_hybrid_desc: "WhatsAppチャット + Instagramフィード。", project_hybrid_eta: "ベータ予定: 2026年Q4", btn_join_waitlist: "リスト登録", status_active: "運用中", project_game_title: "DeLoYGame プラットフォーム", project_game_desc: "ゲームポータル (deloygame.xyz)。", btn_explore_game: "ハブを開く", game_title: "DeLoY サイバーディフェンス Arcade", game_desc: "バグを撃ち落とせ！", game_score: "スコア", game_highscore: "ハイスコア", game_restart: "リトライ", game_start_btn: "スタート", founder_subtitle: "リーダーシップ", founder_head: "Rafiq Qadirov (deloy)", founder_title: "創業者", founder_bio: "DeLoYGroup 創業者。", btn_contact_founder: "創業者に連絡", footer_copy: "© 2026 DeLoYGroup. 創業者: Rafiq Qadirov.", modal_subtitle: "Rafiq Qadirovへ直通。", form_name: "お名前", form_email: "メール", form_message: "メッセージ", btn_send: "送信", form_sent_title: "送信完了", form_sent_desc: "ありがとうございます。" },
+      AR: { nav_about: "عن الشركة", nav_projects: "المشاريع", nav_arch: "المنظومة", nav_telemetry: "الشبكة الحية", nav_game: "لعبة إلكترونية", nav_founder: "القيادة", nav_contact: "اتصل بنا", hero_badge: "بناء الأنظمة الرقمية للجيل القادم", hero_title1: "صياغة مستقبل", hero_title2: "التواصل الاجتماعي والألعاب", hero_sub: "مجموعة تكنولوجية أسسها رفيق قديروف (deloy).", btn_app_preview: "معاينة التطبيق الهجين", projects_subtitle: "المشاريع", projects_title: "المنتجات الرئيسية", projects_desc: "تطوير تجارب رقمية للألعاب.", status_in_dev: "قيد التطوير النشط", project_hybrid_title: "تطبيق DeLoY الموحد للمراسلة والتواصل", project_hybrid_desc: "دردشة WhatsApp + منشورات Instagram.", project_hybrid_eta: "الإطلاق التجريبي: Q4 2026", btn_join_waitlist: "الانضمام للقائمة", status_active: "يعمل حالياً", project_game_title: "منصة DeLoYGame", project_game_desc: "بوابة ألعاب تفاعلية (deloygame.xyz).", btn_explore_game: "تشغيل المركز", game_title: "لعبة DeLoY للدفـاع الإلكتروني", game_desc: "دمر أخطاء النظام القادمة!", game_score: "النقاط", game_highscore: "أعلى نتيجة", game_restart: "إعادة التشغيل", game_start_btn: "ابدأ اللعبة", founder_subtitle: "القيادة", founder_head: "رفيق قديروف (deloy)", founder_title: "المؤسس", founder_bio: "يقود رفيق قديروف تصميم وتطوير DeLoYGroup.", btn_contact_founder: "التواصل مع المؤسس", footer_copy: "© 2026 DeLoYGroup. المؤسس: رفيق قديروف.", modal_subtitle: "رسالة مباشرة إلى رفيق قديروف.", form_name: "الاسم", form_email: "البريد الإلكتروني", form_message: "الرسالة", btn_send: "إرسال", form_sent_title: "تم الإرسال", form_sent_desc: "شكراً لك!" },
+      HI: { nav_about: "हमारे बारे में", nav_projects: "प्रोजेक्ट्स", nav_arch: "इकोसिस्टम", nav_telemetry: "लाइव नेटवर्क", nav_game: "साइबर गेम", nav_founder: "नेतृत्व", nav_contact: "संपर्क करें", hero_badge: "डिजिटल इकोसिस्टम का निर्माण", hero_title1: "गेमिंग और सोशल के", hero_title2: "भविष्य का निर्माण", hero_sub: "रफीक कादिरोव (deloy) द्वारा स्थापित स्वतंत्र तकनीक कंपनी।", btn_app_preview: "ऐप का पूर्वावलोकन", projects_subtitle: "पोर्टफोलियो", projects_title: "प्रमुख उत्पाद", projects_desc: "उच्च प्रदर्शन उत्पाद।", status_in_dev: "विकास में", project_hybrid_title: "DeLoY यूनिफाइड मैसेजिंग और सोशल नेटवर्क", project_hybrid_desc: "WhatsApp मैसेजिंग + Instagram स्टोरीज़।", project_hybrid_eta: "बीटा लॉन्च: Q4 2026", btn_join_waitlist: "वेटलिस्ट", status_active: "सक्रिय", project_game_title: "DeLoYGame प्लेटफॉर्म", project_game_desc: "गेमिंग पोर्टल (deloygame.xyz)।", btn_explore_game: "गेम हब खोलें", game_title: "DeLoY साइबर डिफेंस आर्केड", game_desc: "सिस्टम बग को नष्ट करें!", game_score: "स्कोर", game_highscore: "बेस्ट स्कोर", game_restart: "पुनः प्रारंभ", game_start_btn: "गेम शुरू करें", founder_subtitle: "नेतृत्व", founder_head: "रफीक कादिरोव (deloy)", founder_title: "संस्थापक", founder_bio: "DeLoYGroup के संस्थापक।", btn_contact_founder: "संस्थापक से संपर्क करें", footer_copy: "© 2026 DeLoYGroup. संस्थापक: रफीक कादिरोव।", modal_subtitle: "रफीक कादिरोव को सीधा संदेश।", form_name: "नाम", form_email: "ईमेल", form_message: "संदेश", btn_send: "भेजें", form_sent_title: "सफलतापूर्वक भेजा गया", form_sent_desc: "धन्यवाद!" },
+      KO: { nav_about: "소개", nav_projects: "프로젝트", nav_arch: "생태계", nav_telemetry: "라이브 네트워크", nav_game: "사이버 게임", nav_founder: "리더십", nav_contact: "문의하기", hero_badge: "차세대 디지털 생태계 구축", hero_title1: "소셜과 게이밍의", hero_title2: "미래를 설계하다", hero_sub: "Rafiq Qadirov (deloy)가 설립한 기술 기업.", btn_app_preview: "하이브리드 앱 미리보기", projects_subtitle: "포트폴리오", projects_title: "주요 플랫폼", projects_desc: "차세대 소셜 소통 솔루션.", status_in_dev: "개발 진행 중", project_hybrid_title: "DeLoY 통합 메신저 & 소셜 네트워크", project_hybrid_desc: "WhatsApp 메신저 + Instagram 피드.", project_hybrid_eta: "베타: 2026년 Q4", btn_join_waitlist: "대기 등록", status_active: "라이브", project_game_title: "DeLoYGame 플랫폼", project_game_desc: "게임 포털 (deloygame.xyz).", btn_explore_game: "게임 허브", game_title: "DeLoY 사이버 디펜스 아케이드", game_desc: "버그를 격추하세요!", game_score: "점수", game_highscore: "최고 점수", game_restart: "재시작", game_start_btn: "시작", founder_subtitle: "리더십", founder_head: "Rafiq Qadirov (deloy)", founder_title: "창립자", founder_bio: "DeLoYGroup 창립자.", btn_contact_founder: "창립자 문의", footer_copy: "© 2026 DeLoYGroup. 창립자: Rafiq Qadirov.", modal_subtitle: "Rafiq Qadirov에게 전달됩니다.", form_name: "이름", form_email: "이메일", form_message: "메시지", btn_send: "보내기", form_sent_title: "전송 완료", form_sent_desc: "감사합니다." },
+      PL: { nav_about: "O nas", nav_projects: "Projekty", nav_arch: "Ekosystem", nav_telemetry: "Sieć Live", nav_game: "Gra Cyber", nav_founder: "Liderzy", nav_contact: "Kontakt", hero_badge: "EKOSYSTEMY CYFROWE NOWEJ GENERACJI", hero_title1: "PROJEKTUJEMY", hero_title2: "PRZYSZŁOŚĆ SOCIAL I GAMINGU", hero_sub: "Firma technologiczna założona przez Rafiq Qadirov (deloy).", btn_app_preview: "Podgląd Aplikacji", projects_subtitle: "Portfolio", projects_title: "Główne Produkty", projects_desc: "Rozwiązania cyfrowe rozrywki.", status_in_dev: "W trakcie rozwoju", project_hybrid_title: "Aplikacja DeLoY Messenger + Social", project_hybrid_desc: "Czat WhatsApp + Relacje Instagram.", project_hybrid_eta: "Beta: Q4 2026", btn_join_waitlist: "Dołącz do listy", status_active: "Aktywny", project_game_title: "Platforma DeLoYGame", project_game_desc: "Portal gier (deloygame.xyz).", btn_explore_game: "Centrum Gier", game_title: "Arcade DeLoY Cyber Defense", game_desc: "Niszcz błędy systemowe!", game_score: "PUNKTY", game_highscore: "REKORD", game_restart: "Restart", game_start_btn: "START", founder_subtitle: "LIDERZY", founder_head: "Rafiq Qadirov (deloy)", founder_title: "ZAŁOŻYCIEL", founder_bio: "Założyciel DeLoYGroup.", btn_contact_founder: "Skontaktuj się", footer_copy: "© 2026 DeLoYGroup. Założyciel: Rafiq Qadirov.", modal_subtitle: "Wiadomość do Rafika Qadirova.", form_name: "IMIĘ", form_email: "EMAIL", form_message: "WIADOMOŚĆ", btn_send: "Wyślij", form_sent_title: "Wysłano", form_sent_desc: "Dziękujemy!" },
+      UK: { nav_about: "Про нас", nav_projects: "Проєкти", nav_arch: "Екосистема", nav_telemetry: "Мережа Live", nav_game: "Кібер-Гра", nav_founder: "Керівництво", nav_contact: "Контакти", hero_badge: "ЦИФРОВІ ЕКОСИСТЕМИ НОВОГО ПОКОЛІННЯ", hero_title1: "ПРОЄКТУЄМО", hero_title2: "МАЙБУТНЄ СОЦМЕРЕЖ ТА ГЕЙМІНГУ", hero_sub: "Компанія, заснована Рафіком Кадіровим (deloy).", btn_app_preview: "Перегляд Додатку", projects_subtitle: "Портфоліо", projects_title: "Основні Продукти", projects_desc: "Високопродуктивні рішення.", status_in_dev: "В активній розробці", project_hybrid_title: "Гібридний Месенджер + Соцмережа DeLoY", project_hybrid_desc: "Чат WhatsApp + Медіа-стрічка Instagram.", project_hybrid_eta: "Бета: Q4 2026", btn_join_waitlist: "Приєднатися", status_active: "Працює", project_game_title: "Ігрова Платформа DeLoYGame", project_game_desc: "Ігровий портал (deloygame.xyz).", btn_explore_game: "Запустити Хаб", game_title: "Аркада DeLoY Cyber Defense", game_desc: "Знищуйте системні збої!", game_score: "РАХУНОК", game_highscore: "РЕКОРД", game_restart: "Перезапуск", game_start_btn: "ПОЧАТИ ГРУ", founder_subtitle: "КЕРІВНИЦТВО", founder_head: "Рафік Кадіров (deloy)", founder_title: "ЗАСНОВНИК", founder_bio: "Засновник DeLoYGroup та deloygame.xyz.", btn_contact_founder: "Зв'язатися", footer_copy: "© 2026 DeLoYGroup. Засновник: Рафік Кадіров.", modal_subtitle: "Надсилається безпосередньо Рафіку Кадірову.", form_name: "ІМ'Я", form_email: "EMAIL", form_message: "ПОВІДОМЛЕННЯ", btn_send: "Надіслати", form_sent_title: "Успішно Надіслано", form_sent_desc: "Дякуємо!" }
     };
 
     const supportedLanguages = [
@@ -1317,6 +1139,7 @@
       initThreeJSBackground();
       init3DTilt();
       initGameControls();
+      startTelemetryTicker();
     });
 
     // Populate Custom Language Switcher Dropdown
@@ -1408,6 +1231,155 @@
       e.preventDefault();
       document.getElementById("contactForm").classList.add("hidden");
       document.getElementById("modalSuccess").classList.remove("hidden");
+    }
+
+    // Interactive Social App Phone Preview Controls
+    function openSocialMockupModal() {
+      document.getElementById("socialMockupModal").classList.remove("hidden");
+    }
+    function closeSocialMockupModal() {
+      document.getElementById("socialMockupModal").classList.add("hidden");
+    }
+    function switchPhoneTab(tab) {
+      const msgView = document.getElementById("phoneViewMessages");
+      const feedView = document.getElementById("phoneViewFeed");
+      const tabBtnMsg = document.getElementById("tabBtnMsg");
+      const tabBtnFeed = document.getElementById("tabBtnFeed");
+
+      if (tab === 'messages') {
+        msgView.classList.remove("hidden");
+        feedView.classList.add("hidden");
+        tabBtnMsg.className = "py-3 text-sky-400 border-b-2 border-sky-400 flex items-center justify-center gap-1.5";
+        tabBtnFeed.className = "py-3 text-neutral-400 border-b-2 border-transparent flex items-center justify-center gap-1.5";
+      } else {
+        msgView.classList.add("hidden");
+        feedView.classList.remove("hidden");
+        tabBtnMsg.className = "py-3 text-neutral-400 border-b-2 border-transparent flex items-center justify-center gap-1.5";
+        tabBtnFeed.className = "py-3 text-purple-400 border-b-2 border-purple-400 flex items-center justify-center gap-1.5";
+      }
+    }
+
+    // Interactive Architecture Node Selector
+    function selectArchNode(nodeType) {
+      const title = document.getElementById("archDetailTitle");
+      const desc = document.getElementById("archDetailDesc");
+
+      if (nodeType === 'social') {
+        title.innerText = "Selected Node: DeLoY Social Engine";
+        desc.innerText = "[PROTOCOL]: Hybrid E2EE protocol supporting real-time WebSocket messaging and CDN-backed media story pipelines for WhatsApp + Instagram integration.";
+      } else if (nodeType === 'game') {
+        title.innerText = "Selected Node: DeLoYGame Portal";
+        desc.innerText = "[PROTOCOL]: Low-latency WebSockets & WebRTC multiplayer channel connected directly to deloygame.xyz leaderboard database.";
+      } else {
+        title.innerText = "Selected Node: DeLoY Cloud & Auth Core";
+        desc.innerText = "[CORE PROTOCOL]: Coordinates real-time WebSockets between DeLoY Social and DeLoYGame portal using AES-256 GCM encryption and automated fallback relay nodes.";
+      }
+    }
+
+    // Copy to Clipboard Toast
+    function copyToClipboard(text, label) {
+      const dummy = document.createElement("input");
+      document.body.appendChild(dummy);
+      dummy.value = text;
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+
+      showToast(`Copied ${label} to clipboard!`);
+    }
+
+    function showToast(message) {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = "toast-slide px-4 py-3 rounded-xl bg-neutral-900 text-white font-mono text-xs border border-neutral-700 shadow-2xl flex items-center gap-2 pointer-events-auto";
+      toast.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> ${message}`;
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // CLI Drawer Toggle and Command Handler
+    function toggleConsole() {
+      const drawer = document.getElementById("consoleDrawer");
+      drawer.classList.toggle("hidden");
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "`" || e.key === "~") {
+        e.preventDefault();
+        toggleConsole();
+      }
+    });
+
+    function handleCliSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById("cliInput");
+      const val = input.value.trim().toLowerCase();
+      const output = document.getElementById("terminalOutput");
+      if (!val) return;
+
+      const userLine = document.createElement("div");
+      userLine.className = "text-emerald-400 font-bold";
+      userLine.innerText = `> ${val}`;
+      output.appendChild(userLine);
+
+      const resp = document.createElement("div");
+      resp.className = "text-neutral-300";
+
+      switch(val) {
+        case "help":
+          resp.innerText = "Available commands: help, founder, projects, game, status, contact, clear, theme";
+          break;
+        case "founder":
+          resp.innerText = "Rafiq Qadirov (@deloy) - Founder & Chief Architect of DeLoYGroup.";
+          break;
+        case "projects":
+          resp.innerText = "1. DeLoYGame Portal (deloygame.xyz)\n2. DeLoY Social App (WhatsApp + Instagram Hybrid)";
+          break;
+        case "status":
+          resp.innerText = "Mesh Health: 100% OPERATIONAL | Active Sessions: 14,280 | Relay Ping: 18ms";
+          break;
+        case "game":
+          resp.innerText = "Launching Cyber Defense Arcade...";
+          window.location.hash = "minigame";
+          break;
+        case "contact":
+          resp.innerText = "WhatsApp: +7 927 093-88-18 | Email: support@deloygame.xyz | Site: deloygame.xyz";
+          break;
+        case "theme":
+          toggleTheme();
+          resp.innerText = "Theme toggled.";
+          break;
+        case "clear":
+          output.innerHTML = "";
+          input.value = "";
+          return;
+        default:
+          resp.innerText = `Command not recognized: '${val}'. Type 'help' for options.`;
+      }
+
+      output.appendChild(resp);
+      output.scrollTop = output.scrollHeight;
+      input.value = "";
+    }
+
+    // Telemetry Stat Ticker Simulation
+    function startTelemetryTicker() {
+      setInterval(() => {
+        const activeElem = document.getElementById("statActiveSessions");
+        const tpElem = document.getElementById("statThroughput");
+        if (activeElem) {
+          const current = 14200 + Math.floor(Math.random() * 180);
+          activeElem.innerText = current.toLocaleString();
+        }
+        if (tpElem) {
+          const val = (2.7 + Math.random() * 0.3).toFixed(2);
+          tpElem.innerText = `${val} GB/s`;
+        }
+      }, 2500);
     }
 
     function init3DTilt() {
@@ -1509,7 +1481,7 @@
     }
 
     /* -------------------------------------------------------------
-       DeLoY Cyber Defense - Built-in Arcade Mini-Game Logic
+       DeLoY Cyber Defense - Enhanced Arcade Mini-Game Logic
     ------------------------------------------------------------- */
     let canvas, ctx;
     let gameActive = false;
@@ -1517,9 +1489,10 @@
     let highScore = localStorage.getItem("deloy_highscore") || 0;
     let soundEnabled = true;
 
-    let player = { x: 0, y: 0, width: 36, height: 24, speed: 6, dx: 0 };
+    let player = { x: 0, y: 0, width: 36, height: 24, speed: 6.5, dx: 0, powerUp: "normal", powerTimer: 0 };
     let bullets = [];
     let enemies = [];
+    let powerups = [];
     let particles = [];
     let enemySpawnTimer = 0;
     let keyState = {};
@@ -1610,9 +1583,13 @@
       score = 0;
       bullets = [];
       enemies = [];
+      powerups = [];
       particles = [];
+      player.powerUp = "normal";
+      player.powerTimer = 0;
       gameActive = true;
       document.getElementById("scoreDisplay").innerText = "0";
+      document.getElementById("powerUpDisplay").innerText = "NORMAL";
       document.getElementById("gameOverlay").classList.add("hidden");
       player.x = canvas.width / 2 - player.width / 2;
       requestAnimationFrame(gameLoop);
@@ -1642,18 +1619,18 @@
     }
 
     function shootBullet() {
-      bullets.push({
-        x: player.x + player.width / 2 - 2,
-        y: player.y,
-        width: 4,
-        height: 12,
-        speed: 9
-      });
+      if (player.powerUp === "multishot") {
+        bullets.push({ x: player.x + 4, y: player.y, width: 4, height: 12, speed: 9.5, dx: -1.5 });
+        bullets.push({ x: player.x + player.width / 2 - 2, y: player.y, width: 4, height: 12, speed: 9.5, dx: 0 });
+        bullets.push({ x: player.x + player.width - 8, y: player.y, width: 4, height: 12, speed: 9.5, dx: 1.5 });
+      } else {
+        bullets.push({ x: player.x + player.width / 2 - 2, y: player.y, width: 4, height: 12, speed: 9, dx: 0 });
+      }
       playSoundFX(600, 0.1, "triangle");
     }
 
     function createExplosion(x, y, color) {
-      for (let i = 0; i < 12; i++) {
+      for (let i = 0; i < 14; i++) {
         particles.push({
           x: x,
           y: y,
@@ -1661,7 +1638,7 @@
           dy: (Math.random() - 0.5) * 6,
           radius: Math.random() * 3 + 1,
           color: color,
-          life: 20
+          life: 22
         });
       }
     }
@@ -1672,6 +1649,15 @@
       // Clear Frame
       ctx.fillStyle = "#090a0f";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Powerup Timer Update
+      if (player.powerTimer > 0) {
+        player.powerTimer--;
+        if (player.powerTimer <= 0) {
+          player.powerUp = "normal";
+          document.getElementById("powerUpDisplay").innerText = "NORMAL";
+        }
+      }
 
       // Player Controls Update
       if (keyState["ArrowLeft"] || keyState["a"] || keyState["A"]) {
@@ -1686,7 +1672,7 @@
       if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
 
       // Draw DeLoY Player Ship
-      ctx.fillStyle = "#10b981";
+      ctx.fillStyle = player.powerUp === "multishot" ? "#f59e0b" : "#10b981";
       ctx.beginPath();
       ctx.moveTo(player.x + player.width / 2, player.y);
       ctx.lineTo(player.x + player.width, player.y + player.height);
@@ -1696,7 +1682,7 @@
 
       // Spawn Enemies (Bugs)
       enemySpawnTimer++;
-      const spawnInterval = Math.max(25, 60 - Math.floor(score / 5));
+      const spawnInterval = Math.max(20, 55 - Math.floor(score / 6));
       if (enemySpawnTimer > spawnInterval) {
         enemySpawnTimer = 0;
         enemies.push({
@@ -1705,14 +1691,52 @@
           size: 22,
           speed: 1.8 + Math.random() * 1.5 + (score * 0.05)
         });
+
+        // Chance to spawn powerup
+        if (Math.random() < 0.15) {
+          powerups.push({
+            x: Math.random() * (canvas.width - 20),
+            y: -20,
+            size: 18,
+            speed: 2
+          });
+        }
+      }
+
+      // Update & Draw Powerups
+      for (let i = powerups.length - 1; i >= 0; i--) {
+        let p = powerups[i];
+        p.y += p.speed;
+
+        ctx.fillStyle = "#f59e0b";
+        ctx.beginPath();
+        ctx.arc(p.x + p.size/2, p.y + p.size/2, p.size/2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Collect Powerup
+        if (
+          p.x < player.x + player.width &&
+          p.x + p.size > player.x &&
+          p.y < player.y + player.height &&
+          p.y + p.size > player.y
+        ) {
+          player.powerUp = "multishot";
+          player.powerTimer = 350;
+          document.getElementById("powerUpDisplay").innerText = "MULTI-SHOT";
+          playSoundFX(800, 0.25, "sine");
+          powerups.splice(i, 1);
+        } else if (p.y > canvas.height + 20) {
+          powerups.splice(i, 1);
+        }
       }
 
       // Update & Draw Bullets
       for (let i = bullets.length - 1; i >= 0; i--) {
         let b = bullets[i];
         b.y -= b.speed;
+        b.x += b.dx || 0;
 
-        ctx.fillStyle = "#38bdf8";
+        ctx.fillStyle = player.powerUp === "multishot" ? "#f59e0b" : "#38bdf8";
         ctx.fillRect(b.x, b.y, b.width, b.height);
 
         if (b.y < -10) bullets.splice(i, 1);
