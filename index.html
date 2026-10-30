@@ -1,11 +1,11 @@
-<selection-tag><!DOCTYPE html>
-<html lang="en" class="dark">
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DeLoYGroup | Next-Gen Ecosystem & Cyber Systems</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeLoYGroup — Next-Gen Tech Architecture & Game Ecosystem</title>
   
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -13,1883 +13,976 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              black: '#050508',
-              darkCard: '#0f1118',
-              lightBg: '#f4f5f9',
-              lightCard: '#ffffff',
-              lightBorder: '#cbd5e1',
-              darkBorder: '#1e2230'
-            }
+            accent: 'var(--color-accent, #00f0ff)',
+            'accent-glow': 'var(--color-accent-glow, rgba(0,240,255,0.4))',
           },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['Space Grotesk', 'monospace']
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            }
           }
         }
       }
     }
   </script>
 
-  <!-- Google Fonts & Lucide Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  
-  <!-- Three.js for 3D Background Canvas -->
+  <!-- FontAwesome & Lucide Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Three.js for 3D Background -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Chart.js for Telemetry -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Firebase Integration Scripts -->
+  <style>
+    :root {
+      --color-accent: #00f0ff;
+      --color-accent-glow: rgba(0, 240, 255, 0.35);
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow-x: hidden;
+    }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .light .glass-panel {
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    .accent-border { border-color: var(--color-accent); }
+    .accent-text { color: var(--color-accent); }
+    .accent-bg { background-color: var(--color-accent); }
+    .accent-shadow { box-shadow: 0 0 20px var(--color-accent-glow); }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #090a0f; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+
+    /* Canvas Overlays */
+    #bg-3d, #matrix-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+    #matrix-canvas { z-index: 99; display: none; }
+  </style>
+</head>
+
+<body class="bg-neutral-950 text-slate-100 dark:bg-black dark:text-slate-100 transition-colors duration-300 relative selection:bg-cyan-500 selection:text-black">
+
+  <!-- Canvases -->
+  <div id="bg-3d"></div>
+  <canvas id="matrix-canvas"></canvas>
+
+  <!-- HEADER / NAVBAR -->
+  <header class="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-white/10 px-4 lg:px-8 py-3 transition-all duration-300">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl accent-bg flex items-center justify-center font-black text-black text-xl tracking-tighter transform group-hover:rotate-12 transition-transform duration-300 accent-shadow">
+          DL
+        </div>
+        <div>
+          <span class="font-bold text-lg tracking-wider block leading-none">DeLoY<span class="accent-text">Group</span></span>
+          <span class="text-[10px] text-neutral-400 font-mono tracking-widest uppercase">Rafiq Qadirov Core</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-neutral-300">
+        <a href="#about" class="hover:text-cyan-400 transition-colors" data-i18n="nav_about">About</a>
+        <a href="#projects" class="hover:text-cyan-400 transition-colors" data-i18n="nav_projects">Projects</a>
+        <a href="#ide" class="hover:text-cyan-400 transition-colors" data-i18n="nav_ide">VS Code Terminal</a>
+        <a href="#game" class="hover:text-cyan-400 transition-colors" data-i18n="nav_game">Cyber Game</a>
+        <a href="#telemetry" class="hover:text-cyan-400 transition-colors" data-i18n="nav_telemetry">Live System</a>
+        <a href="#contact" class="hover:text-cyan-400 transition-colors" data-i18n="nav_contact">Contact</a>
+      </nav>
+
+      <!-- Action Controls -->
+      <div class="flex items-center gap-3">
+        
+        <!-- Language Selector -->
+        <select id="lang-select" onchange="changeLanguage(this.value)" class="glass-panel text-xs rounded-lg px-2 py-1.5 focus:outline-none accent-border text-neutral-200">
+          <option value="en">EN 🇺🇸</option>
+          <option value="ru" selected>RU 🇷🇺</option>
+          <option value="az">AZ 🇦🇿</option>
+          <option value="pt">PT 🇵🇹</option>
+          <option value="es">ES 🇪🇸</option>
+          <option value="tr">TR 🇹🇷</option>
+          <option value="de">DE 🇩🇪</option>
+          <option value="fr">FR 🇫🇷</option>
+          <option value="it">IT 🇮🇹</option>
+          <option value="zh">ZH 🇨🇳</option>
+          <option value="ja">JA 🇯🇵</option>
+          <option value="ar">AR 🇸🇦</option>
+        </select>
+
+        <!-- Color Accent Customizer -->
+        <div class="relative group">
+          <button class="w-8 h-8 rounded-lg glass-panel flex items-center justify-center text-xs hover:border-cyan-400">
+            <i class="fa-solid fa-palette text-neutral-300"></i>
+          </button>
+          <div class="absolute right-0 top-10 hidden group-hover:flex glass-panel p-2 rounded-xl flex-col gap-2 z-50 accent-shadow">
+            <button onclick="setAccent('#00f0ff', 'rgba(0,240,255,0.4)')" class="w-6 h-6 rounded-full bg-[#00f0ff] border border-white/20"></button>
+            <button onclick="setAccent('#a855f7', 'rgba(168,85,247,0.4)')" class="w-6 h-6 rounded-full bg-[#a855f7] border border-white/20"></button>
+            <button onclick="setAccent('#22c55e', 'rgba(34,197,94,0.4)')" class="w-6 h-6 rounded-full bg-[#22c55e] border border-white/20"></button>
+            <button onclick="setAccent('#f59e0b', 'rgba(245,158,11,0.4)')" class="w-6 h-6 rounded-full bg-[#f59e0b] border border-white/20"></button>
+          </div>
+        </div>
+
+        <!-- Matrix Toggle -->
+        <button onclick="toggleMatrix()" title="Toggle Matrix Rain (Ctrl+Shift+D)" class="w-8 h-8 rounded-lg glass-panel flex items-center justify-center text-xs hover:text-green-400 hover:border-green-500">
+          <i class="fa-solid fa-terminal"></i>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button onclick="toggleTheme()" class="w-8 h-8 rounded-lg glass-panel flex items-center justify-center text-xs hover:accent-text">
+          <i id="theme-icon" class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="relative z-10 pt-36 pb-20 px-4 max-w-7xl mx-auto min-h-screen flex flex-col justify-center">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-panel border border-cyan-500/30 mb-6 text-xs font-mono accent-text">
+          <span class="w-2 h-2 rounded-full accent-bg animate-ping"></span>
+          <span data-i18n="hero_badge">FOUNDER & CEO: RAFIQ QADIROV (@DELOY)</span>
+        </div>
+
+        <h1 class="text-4xl sm:text-6xl font-black tracking-tight leading-none mb-6">
+          Architecting <br/>
+          <span class="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-500">
+            Next-Gen Tech
+          </span> <br/>
+          Ecosystems.
+        </h1>
+
+        <p class="text-neutral-400 text-base sm:text-lg mb-8 max-w-xl font-light" data-i18n="hero_desc">
+          DeLoYGroup — инновационная IT-компания, создающая масштабируемые игровые платформы, защищенные облачные механизмы и революционный гибрид социалки WhatsApp + Instagram.
+        </p>
+
+        <div class="flex flex-wrap gap-4">
+          <a href="#projects" class="px-6 py-3.5 rounded-xl accent-bg text-black font-bold text-sm tracking-wide hover:opacity-90 transition-all accent-shadow flex items-center gap-2">
+            <i class="fa-solid fa-cubes"></i>
+            <span data-i18n="hero_btn_projects">Исследовать проекты</span>
+          </a>
+          <a href="https://deloygame.xyz" target="_blank" class="px-6 py-3.5 rounded-xl glass-panel font-bold text-sm hover:border-cyan-400 transition-all flex items-center gap-2">
+            <i class="fa-solid fa-gamepad accent-text"></i>
+            <span>deloygame.xyz</span>
+          </a>
+        </div>
+
+        <!-- Quick Telemetry Stats -->
+        <div class="grid grid-cols-3 gap-4 mt-12 pt-8 border-t border-white/10">
+          <div>
+            <div class="text-2xl font-black accent-text font-mono" id="stat-latency">14 ms</div>
+            <div class="text-xs text-neutral-400 font-mono" data-i18n="stat_ping">Global Latency</div>
+          </div>
+          <div>
+            <div class="text-2xl font-black text-emerald-400 font-mono">99.98%</div>
+            <div class="text-xs text-neutral-400 font-mono" data-i18n="stat_uptime">Node Uptime</div>
+          </div>
+          <div>
+            <div class="text-2xl font-black text-indigo-400 font-mono">Firebase v11</div>
+            <div class="text-xs text-neutral-400 font-mono" data-i18n="stat_stack">Cloud Stack</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Smartphone Preview Simulator -->
+      <div class="relative flex justify-center">
+        <div class="w-72 sm:w-80 h-[560px] rounded-[48px] bg-neutral-900 border-4 border-neutral-700 p-3 relative shadow-2xl accent-shadow overflow-hidden">
+          <!-- Notch -->
+          <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-neutral-800 rounded-b-2xl z-30 flex items-center justify-center">
+            <div class="w-3 h-3 rounded-full bg-black border border-neutral-700"></div>
+          </div>
+
+          <!-- Phone Screen UI (DeLoY Social Preview) -->
+          <div class="w-full h-full bg-slate-950 rounded-[36px] pt-8 px-3 pb-3 flex flex-col justify-between overflow-hidden relative">
+            <!-- App Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <span class="font-bold text-sm text-cyan-400 tracking-wider">DeLoY Social</span>
+              <div class="flex items-center gap-2 text-xs text-slate-400">
+                <i class="fa-solid fa-lock text-emerald-400 text-[10px]"></i>
+                <span class="font-mono text-[10px]">E2EE Live</span>
+              </div>
+            </div>
+
+            <!-- Stories Row (Instagram Style) -->
+            <div class="flex gap-2 overflow-x-auto py-2 scrollbar-none">
+              <div class="flex-shrink-0 flex flex-col items-center gap-1">
+                <div class="w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-amber-500 via-pink-500 to-cyan-400">
+                  <div class="w-full h-full bg-slate-900 rounded-full flex items-center justify-center font-bold text-xs">Rafiq</div>
+                </div>
+                <span class="text-[9px] text-slate-400">@deloy</span>
+              </div>
+              <div class="flex-shrink-0 flex flex-col items-center gap-1">
+                <div class="w-12 h-12 rounded-full p-0.5 bg-slate-800 flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-plus text-slate-400"></i>
+                </div>
+                <span class="text-[9px] text-slate-400">Status</span>
+              </div>
+            </div>
+
+            <!-- Chat Stream (WhatsApp Hybrid) -->
+            <div class="flex-1 overflow-y-auto my-2 flex flex-col gap-2.5 text-xs">
+              <div class="self-start max-w-[80%] bg-slate-800 p-2.5 rounded-2xl rounded-tl-none text-slate-200">
+                <p class="font-bold text-[10px] text-cyan-400 mb-0.5">@deloy_core</p>
+                Добро пожаловать в тестинг гибридного приложения DeLoY Social!
+              </div>
+              <div class="self-end max-w-[80%] accent-bg text-black p-2.5 rounded-2xl rounded-tr-none font-medium">
+                Мессенджер + Лента историй интегрированы в единое ядро! 🚀
+              </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="bg-slate-900 rounded-2xl p-2 flex justify-around text-slate-400 text-sm">
+              <i class="fa-solid fa-comment-dots text-cyan-400"></i>
+              <i class="fa-solid fa-compass hover:text-white"></i>
+              <i class="fa-solid fa-paper-plane hover:text-white"></i>
+              <i class="fa-solid fa-user hover:text-white"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- VS CODE IDE & TERMINAL (Idea #1) -->
+  <section id="ide" class="relative z-10 py-16 px-4 max-w-7xl mx-auto">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl font-black mb-2" data-i18n="ide_title">DeLoY Developer Terminal & VS Code Simulator</h2>
+      <p class="text-neutral-400 text-sm" data-i18n="ide_subtitle">Интерактивная среда управления и командный CLI-интерфейс</p>
+    </div>
+
+    <div class="glass-panel rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+      <!-- IDE Header Bar -->
+      <div class="bg-slate-900/90 px-4 py-3 border-b border-white/10 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+          <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+          <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+          <span class="ml-4 font-mono text-xs text-neutral-400">deloygroup-core-v2.5.js — Visual Studio Code</span>
+        </div>
+        <div class="flex gap-3 text-xs font-mono text-neutral-400">
+          <span class="accent-text"><i class="fa-solid fa-code-branch"></i> main</span>
+          <span>UTF-8</span>
+          <span>JavaScript</span>
+        </div>
+      </div>
+
+      <!-- IDE Workspace -->
+      <div class="grid lg:grid-cols-2 bg-slate-950 font-mono text-xs h-[420px]">
+        
+        <!-- Code View -->
+        <div class="p-4 border-r border-white/10 overflow-y-auto text-neutral-300">
+<pre><code class="text-cyan-300">// DeLoYGroup Core Architecture
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+
+const founder = {
+  name: "Rafiq Qadirov",
+  alias: "deloy",
+  role: "Lead Architect & Developer",
+  activeProjects: ["DeLoYGame", "DeLoY Social (WhatsApp + Instagram Hybrid)"]
+};
+
+export async function executeEcosystemNode() {
+  console.log(`[DeLoY Core] Launching services for ${founder.alias}...`);
+  return { status: "ONLINE", firebase: "CONNECTED", encryption: "E2EE AES-256" };
+}</code></pre>
+        </div>
+
+        <!-- Terminal Output Window -->
+        <div class="p-4 bg-black flex flex-col justify-between">
+          <div id="terminal-logs" class="overflow-y-auto space-y-1.5 text-emerald-400">
+            <div>[DeLoY OS v2.6 Ready]</div>
+            <div class="text-neutral-500">Type <span class="text-cyan-400">'help'</span> for available system commands.</div>
+          </div>
+
+          <!-- Command Input Form -->
+          <form onsubmit="handleTerminalSubmit(event)" class="mt-4 flex items-center gap-2 border-t border-slate-800 pt-2">
+            <span class="text-cyan-400 font-bold">deloy@group:~$</span>
+            <input type="text" id="terminal-input" autocomplete="off" placeholder="type 'help', 'projects', 'game', 'ping'..." class="bg-transparent text-white focus:outline-none flex-1 font-mono text-xs">
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS SHOWCASE -->
+  <section id="projects" class="relative z-10 py-16 px-4 max-w-7xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-black mb-2" data-i18n="projects_title">Флагманские Разработки</h2>
+      <p class="text-neutral-400 text-sm" data-i18n="projects_subtitle">Ключевые цифровые продукты компании DeLoYGroup</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8">
+      
+      <!-- Project 1: DeLoYGame -->
+      <div class="glass-panel p-6 rounded-2xl border border-white/10 hover:border-cyan-400/50 transition-all group">
+        <div class="flex justify-between items-start mb-4">
+          <div class="w-12 h-12 rounded-xl accent-bg flex items-center justify-center text-black font-black text-xl">
+            <i class="fa-solid fa-gamepad"></i>
+          </div>
+          <span class="px-3 py-1 rounded-full text-[10px] font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            LIVE / ACTIVE
+          </span>
+        </div>
+        <h3 class="text-xl font-bold mb-2 group-hover:accent-text transition-colors">DeLoYGame Ecosystem</h3>
+        <p class="text-neutral-400 text-sm mb-6 leading-relaxed">
+          Игровая веб-платформа с облачной синхронизацией рекордов, быстрым движком казуальных игр и интегрированным сообществом.
+        </p>
+        <div class="flex items-center justify-between border-t border-white/10 pt-4 text-xs font-mono">
+          <span class="text-neutral-400">Domain: <a href="https://deloygame.xyz" target="_blank" class="accent-text hover:underline">deloygame.xyz</a></span>
+          <a href="https://deloygame.xyz" target="_blank" class="px-3 py-1.5 rounded-lg glass-panel hover:bg-cyan-500 hover:text-black font-sans font-bold transition-all">
+            Открыть <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Project 2: DeLoY Social App -->
+      <div class="glass-panel p-6 rounded-2xl border border-white/10 hover:border-purple-400/50 transition-all group">
+        <div class="flex justify-between items-start mb-4">
+          <div class="w-12 h-12 rounded-xl bg-purple-500 flex items-center justify-center text-black font-black text-xl">
+            <i class="fa-solid fa-comments"></i>
+          </div>
+          <span class="px-3 py-1 rounded-full text-[10px] font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            IN DEVELOPMENT
+          </span>
+        </div>
+        <h3 class="text-xl font-bold mb-2 group-hover:text-purple-400 transition-colors">DeLoY Social (WhatsApp + Instagram Hybrid)</h3>
+        <p class="text-neutral-400 text-sm mb-6 leading-relaxed">
+          Инновационная социальная платформа, объединяющая сквозное шифрование мгновенных сообщений (WhatsApp) и визуальную медиа-ленту с историями (Instagram).
+        </p>
+        <div class="flex items-center justify-between border-t border-white/10 pt-4 text-xs font-mono">
+          <span class="text-neutral-400">Security: E2EE AES-256</span>
+          <span class="text-purple-400 font-bold">Progress: 88%</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FEATURE COMPARISON MATRIX (Idea #8) -->
+  <section class="relative z-10 py-16 px-4 max-w-7xl mx-auto">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl font-black mb-2" data-i18n="matrix_title">Матрица Сравнения Функционала</h2>
+      <p class="text-neutral-400 text-sm" data-i18n="matrix_subtitle">Почему DeLoY Social превосходит традиционные решения</p>
+    </div>
+
+    <div class="glass-panel rounded-2xl border border-white/10 overflow-x-auto">
+      <table class="w-full text-left border-collapse text-sm">
+        <thead>
+          <tr class="border-b border-white/10 bg-slate-900/50 font-mono text-xs accent-text">
+            <th class="p-4">Возможности / Платформа</th>
+            <th class="p-4">DeLoY Social</th>
+            <th class="p-4 text-neutral-400">WhatsApp</th>
+            <th class="p-4 text-neutral-400">Instagram</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5 text-neutral-300">
+          <tr>
+            <td class="p-4 font-semibold">Гибрид Мессенджера + Ленты</td>
+            <td class="p-4 accent-text font-bold"><i class="fa-solid fa-circle-check"></i> Нативно</td>
+            <td class="p-4 text-neutral-500"><i class="fa-solid fa-circle-xmark"></i> Нет</td>
+            <td class="p-4 text-neutral-500"><i class="fa-solid fa-circle-xmark"></i> Нет</td>
+          </tr>
+          <tr>
+            <td class="p-4 font-semibold">Сквозное Шифрование (E2EE)</td>
+            <td class="p-4 accent-text font-bold"><i class="fa-solid fa-circle-check"></i> AES-256</td>
+            <td class="p-4 text-emerald-400"><i class="fa-solid fa-circle-check"></i> Да</td>
+            <td class="p-4 text-neutral-500"><i class="fa-solid fa-circle-xmark"></i> Частично</td>
+          </tr>
+          <tr>
+            <td class="p-4 font-semibold">Отсутствие Теневой Рекламы</td>
+            <td class="p-4 accent-text font-bold"><i class="fa-solid fa-circle-check"></i> 100% Чистый UI</td>
+            <td class="p-4 text-neutral-500"><i class="fa-solid fa-circle-xmark"></i> Нет</td>
+            <td class="p-4 text-neutral-500"><i class="fa-solid fa-circle-xmark"></i> Нет</td>
+          </tr>
+          <tr>
+            <td class="p-4 font-semibold">Скорость Отклика Базы Данных</td>
+            <td class="p-4 accent-text font-bold"><i class="fa-solid fa-bolt"></i> &lt; 15ms (Firebase)</td>
+            <td class="p-4 text-neutral-400">~ 45ms</td>
+            <td class="p-4 text-neutral-400">~ 60ms</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CYBER DEFENSE MINI-GAME & FIREBASE LEADERBOARD -->
+  <section id="game" class="relative z-10 py-16 px-4 max-w-7xl mx-auto">
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-black mb-2" data-i18n="game_title">DeLoY Cyber Defense (Аркадный Модуль)</h2>
+      <p class="text-neutral-400 text-sm" data-i18n="game_subtitle">Уничтожайте вредоносный код и сохраняйте рекорд в глобальной базе Firebase</p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-8 items-start">
+      
+      <!-- Game Canvas Container -->
+      <div class="lg:col-span-2 glass-panel p-4 rounded-2xl border border-white/10 flex flex-col items-center">
+        <div class="w-full flex justify-between items-center mb-3 text-xs font-mono px-2">
+          <span class="text-neutral-400">Счет: <span id="game-score" class="accent-text font-bold text-base">0</span></span>
+          <span class="text-neutral-400">Рекорд: <span id="game-high" class="text-emerald-400 font-bold text-base">0</span></span>
+        </div>
+
+        <canvas id="cyber-game-canvas" width="600" height="400" class="w-full max-w-full bg-black rounded-xl border border-slate-800 cursor-crosshair shadow-inner"></canvas>
+
+        <div class="w-full flex justify-between items-center mt-4">
+          <button onclick="startCyberGame()" class="px-6 py-2.5 rounded-xl accent-bg text-black font-bold text-xs uppercase tracking-wider accent-shadow hover:opacity-90">
+            <i class="fa-solid fa-play mr-1"></i> Старт / Перезапуск
+          </button>
+          <span class="text-[11px] text-neutral-400 font-mono hidden sm:inline">Управление: Стрелки / A-D / Кликер</span>
+        </div>
+      </div>
+
+      <!-- Realtime Firebase Leaderboard -->
+      <div class="glass-panel p-6 rounded-2xl border border-white/10">
+        <h3 class="font-bold text-base mb-4 flex items-center gap-2 accent-text">
+          <i class="fa-solid fa-trophy"></i> Глобальный Топ (Firebase Firestore)
+        </h3>
+        <div id="leaderboard-list" class="space-y-3 font-mono text-xs">
+          <div class="text-neutral-500">Загрузка рекордов из Firestore...</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- AUDIO LAB (Idea #4) -->
+  <section class="relative z-10 py-16 px-4 max-w-7xl mx-auto">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl font-black mb-2" data-i18n="audio_title">DeLoY Web Audio Synthesizer Lab</h2>
+      <p class="text-neutral-400 text-sm" data-i18n="audio_subtitle">Генерация системных звуков приложения без внешних аудио-файлов</p>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <button onclick="playSynthSound('click')" class="glass-panel p-4 rounded-xl border border-white/10 hover:border-cyan-400 text-center group">
+        <i class="fa-solid fa-bullhorn text-2xl accent-text mb-2 group-hover:scale-110 transition-transform"></i>
+        <div class="font-mono text-xs font-bold">UI Click Synth</div>
+      </button>
+      <button onclick="playSynthSound('laser')" class="glass-panel p-4 rounded-xl border border-white/10 hover:border-purple-400 text-center group">
+        <i class="fa-solid fa-bolt text-2xl text-purple-400 mb-2 group-hover:scale-110 transition-transform"></i>
+        <div class="font-mono text-xs font-bold">Laser Beam</div>
+      </button>
+      <button onclick="playSynthSound('success')" class="glass-panel p-4 rounded-xl border border-white/10 hover:border-emerald-400 text-center group">
+        <i class="fa-solid fa-circle-check text-2xl text-emerald-400 mb-2 group-hover:scale-110 transition-transform"></i>
+        <div class="font-mono text-xs font-bold">E2EE Success</div>
+      </button>
+      <button onclick="playSynthSound('explosion')" class="glass-panel p-4 rounded-xl border border-white/10 hover:border-red-400 text-center group">
+        <i class="fa-solid fa-bomb text-2xl text-red-400 mb-2 group-hover:scale-110 transition-transform"></i>
+        <div class="font-mono text-xs font-bold">Glitch Blast</div>
+      </button>
+    </div>
+  </section>
+
+  <!-- LIVE TELEMETRY & GITHUB COMMITS (Idea #2 & #10) -->
+  <section id="telemetry" class="relative z-10 py-16 px-4 max-w-7xl mx-auto">
+    <div class="grid lg:grid-cols-2 gap-8">
+      
+      <!-- Live Telemetry Graph -->
+      <div class="glass-panel p-6 rounded-2xl border border-white/10">
+        <h3 class="font-bold text-lg mb-2 accent-text" data-i18n="telemetry_title">Системная Телеметрия Серверов</h3>
+        <p class="text-neutral-400 text-xs mb-4">Нагрузка на Firebase Cloud Nodes и задержка отклика в реальном времени</p>
+        <div class="h-64">
+          <canvas id="telemetry-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Live Git Commit History -->
+      <div class="glass-panel p-6 rounded-2xl border border-white/10">
+        <h3 class="font-bold text-lg mb-4 text-purple-400 flex items-center justify-between">
+          <span><i class="fa-solid fa-code-commit mr-2"></i> Behind the Code (Changelog)</span>
+          <span class="text-xs font-mono text-neutral-400">GitHub: @deloygame</span>
+        </h3>
+        <div class="space-y-4 font-mono text-xs">
+          <div class="border-l-2 border-cyan-400 pl-3">
+            <div class="font-bold text-slate-200">Commit #408: Configured Realtime Firebase Config</div>
+            <div class="text-neutral-500 text-[10px]">Today at 21:40 • Auth, Firestore & Storage rules update</div>
+          </div>
+          <div class="border-l-2 border-purple-400 pl-3">
+            <div class="font-bold text-slate-200">Commit #407: Integrated E2EE Message Pipeline</div>
+            <div class="text-neutral-500 text-[10px]">Yesterday • DeLoY Social WhatsApp+Instagram Hybrid Core</div>
+          </div>
+          <div class="border-l-2 border-emerald-400 pl-3">
+            <div class="font-bold text-slate-200">Commit #405: Audio Synth & Multi-language Support</div>
+            <div class="text-neutral-500 text-[10px]">3 days ago • Added Web Audio API & 12 i18n locales</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONTACT & FIREBASE TICKET SYSTEM (Idea #7) -->
+  <section id="contact" class="relative z-10 py-16 px-4 max-w-7xl mx-auto">
+    <div class="max-w-3xl mx-auto glass-panel p-8 rounded-3xl border border-white/10 accent-shadow">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-black mb-2" data-i18n="contact_title">Связаться с DeLoYGroup</h2>
+        <p class="text-neutral-400 text-sm">Официальная поддержка владельца компании Рафига Кадирова (@deloy)</p>
+      </div>
+
+      <!-- Official Contact Badges -->
+      <div class="grid sm:grid-cols-3 gap-4 mb-8 text-center text-xs font-mono">
+        <a href="https://wa.me/79270938818" target="_blank" class="p-3 rounded-xl glass-panel border border-emerald-500/30 hover:border-emerald-400 text-emerald-400 block">
+          <i class="fa-brands fa-whatsapp text-lg mb-1 block"></i>
+          +7 927 093-88-18
+        </a>
+        <a href="mailto:support@deloygame.xyz" class="p-3 rounded-xl glass-panel border border-cyan-500/30 hover:border-cyan-400 accent-text block">
+          <i class="fa-solid fa-envelope text-lg mb-1 block"></i>
+          support@deloygame.xyz
+        </a>
+        <a href="https://deloygame.xyz" target="_blank" class="p-3 rounded-xl glass-panel border border-purple-500/30 hover:border-purple-400 text-purple-400 block">
+          <i class="fa-solid fa-globe text-lg mb-1 block"></i>
+          deloygame.xyz
+        </a>
+      </div>
+
+      <!-- Firebase Contact Ticket Form -->
+      <form onsubmit="submitFirebaseTicket(event)" class="space-y-4">
+        <div class="grid sm:grid-cols-2 gap-4">
+          <input type="text" id="ticket-name" required placeholder="Ваше имя / Никнейм" class="w-full glass-panel px-4 py-3 rounded-xl text-xs focus:outline-none focus:border-cyan-400 border border-white/10 text-white">
+          <input type="text" id="ticket-contact" required placeholder="Email или WhatsApp" class="w-full glass-panel px-4 py-3 rounded-xl text-xs focus:outline-none focus:border-cyan-400 border border-white/10 text-white">
+        </div>
+        <textarea id="ticket-message" rows="4" required placeholder="Ваше сообщение или предложение по проекту..." class="w-full glass-panel px-4 py-3 rounded-xl text-xs focus:outline-none focus:border-cyan-400 border border-white/10 text-white"></textarea>
+        
+        <button type="submit" class="w-full py-3.5 rounded-xl accent-bg text-black font-bold text-xs uppercase tracking-wider accent-shadow hover:opacity-90 transition-all">
+          <i class="fa-solid fa-paper-plane mr-2"></i> Отправить тикет в Firestore
+        </button>
+      </form>
+      <div id="ticket-status" class="mt-4 text-center font-mono text-xs hidden"></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="relative z-10 border-t border-white/10 py-8 px-4 text-center text-xs text-neutral-500 font-mono">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div>© 2026 DeLoYGroup. All rights reserved. CEO: Rafiq Qadirov ("deloy").</div>
+      <div class="flex gap-4">
+        <a href="https://deloygame.xyz" target="_blank" class="hover:text-cyan-400">deloygame.xyz</a>
+        <a href="mailto:support@deloygame.xyz" class="hover:text-cyan-400">support@deloygame.xyz</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FIREBASE SDKs -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-    // Initialize Firebase Configuration
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'deloygroup-portal';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-      apiKey: "demo-api-key",
-      authDomain: "deloygroup.firebaseapp.com",
-      projectId: "deloygroup",
-      storageBucket: "deloygroup.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:demo"
+    // Your actual Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAHhq-26oXU9QFXTOQDGldCjnRbg4G6TMU",
+      authDomain: "deloygroup-sw.firebaseapp.com",
+      databaseURL: "https://deloygroup-sw-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "deloygroup-sw",
+      storageBucket: "deloygroup-sw.firebasestorage.app",
+      messagingSenderId: "300489206378",
+      appId: "1:300489206378:web:a8fa76c6e223f01d90b813",
+      measurementId: "G-3SLBY4BWB6"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    window.deloyFirebase = { app, auth, db, appId, collection, addDoc, onSnapshot, doc, setDoc };
+    // Anonymous Sign In
+    signInAnonymously(auth).then(() => {
+      console.log("[DeLoY Firebase] Authenticated anonymously.");
+      listenToLeaderboard();
+    }).catch(err => console.warn("[Firebase Auth]", err));
 
-    // Authenticate First
-    async function initAuth() {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
+    // Firebase Leaderboard Snapshot Listener
+    function listenToLeaderboard() {
+      const scoresRef = collection(db, "scores");
+      const q = query(scoresRef, orderBy("score", "desc"), limit(5));
+      
+      onSnapshot(q, (snapshot) => {
+        const list = document.getElementById('leaderboard-list');
+        if (!list) return;
+        list.innerHTML = '';
+        if (snapshot.empty) {
+          list.innerHTML = '<div class="text-neutral-500">Нет сохраненных рекордов. Станьте первым!</div>';
+          return;
         }
-      } catch (err) {
-        console.warn("Firebase auth fallback to anonymous", err);
-        try { await signInAnonymously(auth); } catch(e){}
-      }
+        let rank = 1;
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          list.innerHTML += `
+            <div class="flex justify-between items-center p-2 rounded-lg bg-slate-900/60 border border-white/5">
+              <span class="font-bold text-neutral-300">#${rank++} ${data.name || 'Anonymous'}</span>
+              <span class="accent-text font-bold">${data.score} PTS</span>
+            </div>
+          `;
+        });
+      });
     }
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.currentUserId = user.uid;
-        if (window.onFirebaseReady) window.onFirebaseReady();
-      }
-    });
+    // Save Game Score to Firestore
+    window.saveScoreToFirestore = async function(score) {
+      try {
+        await addDoc(collection(db, "scores"), {
+          name: "Player_deloy",
+          score: score,
+          timestamp: serverTimestamp()
+        });
+      } catch(e) { console.error("Firestore Save Error", e); }
+    };
 
-    initAuth();
+    // Save Contact Ticket to Firestore
+    window.submitFirebaseTicket = async function(e) {
+      e.preventDefault();
+      const status = document.getElementById('ticket-status');
+      status.classList.remove('hidden');
+      status.innerText = "Отправка тикета в Firestore...";
+      status.className = "mt-4 text-center font-mono text-xs accent-text";
+
+      try {
+        await addDoc(collection(db, "tickets"), {
+          name: document.getElementById('ticket-name').value,
+          contact: document.getElementById('ticket-contact').value,
+          message: document.getElementById('ticket-message').value,
+          timestamp: serverTimestamp()
+        });
+        status.innerText = "✓ Тикет успешно записан в Firebase! Мы свяжемся с вами.";
+        status.className = "mt-4 text-center font-mono text-xs text-emerald-400";
+        e.target.reset();
+      } catch(err) {
+        status.innerText = "Ошибка отправки в базу: " + err.message;
+        status.className = "mt-4 text-center font-mono text-xs text-red-400";
+      }
+    };
   </script>
 
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      transition: background-color 0.3s ease, color 0.3s ease;
-      overflow-x: hidden;
-    }
-    .font-heading {
-      font-family: 'Space Grotesk', sans-serif;
-    }
-    
-    /* Glassmorphism Styles for Light & Dark Theme */
-    .dark .glass-panel {
-      background: rgba(15, 17, 24, 0.88);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #f8fafc;
-    }
-    .glass-panel {
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      color: #0f172a;
-    }
-    
-    .dark .glass-card {
-      background: rgba(20, 22, 32, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-    }
-
-    /* Subtle 3D Card Hover Perspective */
-    .tilt-card {
-      transform-style: preserve-3d;
-      transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
-    }
-    
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #08080c;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #232636;
-      border-radius: 4px;
-    }
-
-    [dir="rtl"] {
-      text-align: right;
-    }
-
-    canvas#gameCanvas {
-      background: #090a0f;
-      touch-action: none;
-    }
-
-    .toast-slide {
-      animation: toastIn 0.3s ease forwards;
-    }
-    @keyframes toastIn {
-      from { transform: translateY(100%) scale(0.9); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
-    }
-
-    /* Terminal blinking cursor */
-    .cursor-blink {
-      animation: blink 1s step-end infinite;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-
-    .audio-wave-bar {
-      animation: wavePulse 1.2s ease-in-out infinite alternate;
-    }
-    @keyframes wavePulse {
-      0% { height: 6px; }
-      100% { height: 22px; }
-    }
-  </style>
-</head>
-
-<body class="bg-brand-lightBg text-slate-900 dark:bg-brand-black dark:text-slate-100 transition-colors duration-300 relative min-h-screen pb-12">
-
-  <!-- Toast Notification Container -->
-  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-  <!-- 3D Background Canvas -->
-  <div id="canvas-container" class="fixed inset-0 pointer-events-none z-0 opacity-40 dark:opacity-60"></div>
-
-  <!-- Header / Navigation -->
-  <header class="fixed top-0 left-0 right-0 z-40 px-4 sm:px-8 py-4">
-    <div class="max-w-7xl mx-auto rounded-2xl glass-panel transition-all duration-300 px-6 py-3 flex items-center justify-between shadow-2xl">
-      
-      <!-- Brand Logo -->
-      <a href="#" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black font-extrabold font-heading text-xl flex items-center justify-center shadow-lg transform group-hover:scale-105 transition-transform">
-          D
-        </div>
-        <div class="flex flex-col">
-          <span class="font-heading font-bold text-lg tracking-wider leading-none text-slate-900 dark:text-white">DeLoY<span class="text-neutral-500 font-normal">GROUP</span></span>
-          <span class="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono tracking-widest mt-1">BY RAFIQ QADIROV</span>
-        </div>
-      </a>
-
-      <!-- Desktop Navigation Links -->
-      <nav class="hidden md:flex items-center gap-7 text-sm font-semibold">
-        <a href="#about" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_about">About</a>
-        <a href="#projects" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_projects">Projects</a>
-        <a href="#firebase-arch" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors flex items-center gap-1.5">
-          <i data-lucide="flame" class="w-4 h-4 text-amber-500"></i>
-          <span>Firebase Mesh</span>
-        </a>
-        <a href="#architecture" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_arch">Ecosystem</a>
-        <a href="#telemetry" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_telemetry">Live Mesh</a>
-        <a href="#minigame" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors flex items-center gap-1.5">
-          <i data-lucide="gamepad-2" class="w-4 h-4 text-emerald-500"></i>
-          <span data-i18n="nav_game">Cyber Game</span>
-        </a>
-        <a href="#founder" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_founder">Leadership</a>
-      </nav>
-
-      <!-- Language, Theme & Console Controls -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        
-        <!-- Terminal Drawer Trigger Button -->
-        <button onclick="toggleConsole()" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-300 dark:border-neutral-800 bg-neutral-100/90 dark:bg-neutral-900/90 text-xs font-mono font-semibold text-slate-900 dark:text-emerald-400 hover:border-emerald-500 transition-all" title="Toggle Developer Terminal (~)">
-          <i data-lucide="terminal" class="w-4 h-4"></i>
-          <span>CLI</span>
-        </button>
-
-        <!-- Language Selector Dropdown -->
-        <div class="relative inline-block text-left" id="langDropdownContainer">
-          <button id="langBtn" onclick="toggleLangDropdown()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-neutral-300 dark:border-neutral-800 bg-neutral-100/90 dark:bg-neutral-900/90 text-xs font-semibold text-slate-900 dark:text-slate-100 hover:border-neutral-400 dark:hover:border-neutral-600 transition-all">
-            <i data-lucide="globe" class="w-4 h-4"></i>
-            <span id="currentLangLabel">EN</span>
-            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-neutral-400"></i>
-          </button>
-
-          <!-- Dropdown Menu -->
-          <div id="langDropdown" class="hidden absolute right-0 mt-2 w-48 rounded-2xl glass-panel shadow-2xl border border-neutral-200 dark:border-neutral-800 py-2 z-50 max-h-72 overflow-y-auto">
-            <!-- Languages populated dynamically via JS -->
-          </div>
-        </div>
-
-        <!-- Dark / Light Theme Toggle -->
-        <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-xl border border-neutral-300 dark:border-neutral-800 bg-neutral-100/90 dark:bg-neutral-900/90 text-slate-900 dark:text-slate-100 hover:border-neutral-400 dark:hover:border-neutral-600 transition-all" title="Toggle Theme">
-          <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
-          <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
-        </button>
-
-        <!-- Mobile Menu Trigger Button -->
-        <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-xl border border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 text-slate-900 dark:text-slate-100">
-          <i data-lucide="menu" class="w-5 h-5"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Mobile Dropdown Menu -->
-    <div id="mobileMenu" class="hidden md:hidden max-w-7xl mx-auto mt-2 rounded-2xl glass-panel p-6 flex flex-col gap-4 shadow-xl">
-      <a href="#about" onclick="toggleMobileMenu()" class="text-slate-800 dark:text-slate-200 font-medium" data-i18n="nav_about">About</a>
-      <a href="#projects" onclick="toggleMobileMenu()" class="text-slate-800 dark:text-slate-200 font-medium" data-i18n="nav_projects">Projects</a>
-      <a href="#architecture" onclick="toggleMobileMenu()" class="text-slate-800 dark:text-slate-200 font-medium" data-i18n="nav_arch">Ecosystem</a>
-      <a href="#telemetry" onclick="toggleMobileMenu()" class="text-slate-800 dark:text-slate-200 font-medium" data-i18n="nav_telemetry">Live Mesh</a>
-      <a href="#minigame" onclick="toggleMobileMenu()" class="text-slate-800 dark:text-slate-200 font-medium" data-i18n="nav_game">Cyber Game</a>
-      <a href="#founder" onclick="toggleMobileMenu()" class="text-slate-800 dark:text-slate-200 font-medium" data-i18n="nav_founder">Leadership</a>
-      <button onclick="toggleMobileMenu(); toggleConsole();" class="text-left font-mono text-emerald-500 font-semibold flex items-center gap-2">
-        <i data-lucide="terminal" class="w-4 h-4"></i> Open DeLoY Console CLI
-      </button>
-    </div>
-  </header>
-
-  <!-- Developer CLI Drawer / Terminal -->
-  <div id="consoleDrawer" class="fixed top-24 right-4 sm:right-8 z-50 w-[92vw] sm:w-[480px] rounded-2xl bg-neutral-950/95 text-emerald-400 border border-neutral-800 shadow-2xl p-4 font-mono text-xs hidden transition-all duration-300 backdrop-blur-xl">
-    <div class="flex items-center justify-between pb-3 mb-3 border-b border-neutral-800 text-neutral-400">
-      <div class="flex items-center gap-2">
-        <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
-        <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
-        <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
-        <span class="text-[11px] font-bold text-neutral-300 ml-2">deloy-cli ~ v2.4.0</span>
-      </div>
-      <button onclick="toggleConsole()" class="hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
-    </div>
-    
-    <div id="terminalOutput" class="h-64 overflow-y-auto space-y-2 pr-1 mb-3">
-      <div class="text-neutral-400">DeLoYGroup Cyber Terminal System</div>
-      <div class="text-neutral-500">Type <span class="text-amber-400 font-bold">help</span> to view available terminal commands.</div>
-    </div>
-
-    <form onsubmit="handleCliSubmit(event)" class="flex items-center gap-2 pt-2 border-t border-neutral-800">
-      <span class="text-emerald-500 font-bold">&gt;</span>
-      <input id="cliInput" type="text" placeholder="type help, projects, status, founder..." class="w-full bg-transparent text-emerald-300 border-none outline-none font-mono text-xs focus:ring-0">
-    </form>
-  </div>
-
-  <!-- Hero Section -->
-  <section class="relative pt-36 pb-20 md:pt-48 md:pb-32 px-4 sm:px-8 z-10 overflow-hidden" id="about">
-    <div class="max-w-6xl mx-auto text-center">
-      
-      <!-- Top Innovation Badge -->
-      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md mb-8 shadow-sm">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-        <span class="text-xs font-mono font-semibold tracking-wide text-slate-800 dark:text-neutral-200 uppercase" data-i18n="hero_badge">BUILDING NEXT-GEN DIGITAL ECOSYSTEMS</span>
-      </div>
-
-      <!-- Main Heading -->
-      <h1 class="font-heading text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.08] mb-8">
-        <span data-i18n="hero_title1">ARCHITECTING THE</span> <br class="hidden sm:inline">
-        <span class="bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-neutral-600 to-black dark:from-white dark:via-neutral-300 dark:to-neutral-500" data-i18n="hero_title2">FUTURE OF SOCIAL & GAMING</span>
-      </h1>
-
-      <!-- Subtitle -->
-      <p class="max-w-3xl mx-auto text-base sm:text-lg md:text-xl text-slate-700 dark:text-neutral-300 font-medium leading-relaxed mb-10" data-i18n="hero_sub">
-        DeLoYGroup is an independent tech conglomerate specializing in interactive gaming platforms and unified social communication networks. Founded & engineered by Rafiq Qadirov (deloy).
-      </p>
-
-      <!-- Action CTA Buttons -->
-      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-        <a href="https://deloygame.xyz" target="_blank" class="px-8 py-4 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-bold text-sm sm:text-base hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all shadow-xl hover:scale-105 active:scale-95 flex items-center gap-3">
-          <i data-lucide="globe" class="w-5 h-5"></i>
-          <span>deloygame.xyz</span>
-        </a>
-        <button onclick="openSocialMockupModal()" class="px-8 py-4 rounded-xl border border-neutral-300 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 text-slate-900 dark:text-white font-bold text-sm sm:text-base hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all hover:scale-105 active:scale-95 flex items-center gap-3 backdrop-blur-md shadow-md">
-          <i data-lucide="smartphone" class="w-5 h-5 text-sky-500"></i>
-          <span data-i18n="btn_app_preview">Preview Hybrid App</span>
-        </button>
-      </div>
-
-      <!-- Quick Verified Contact Info Cards Strip -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-16 max-w-4xl mx-auto p-4 rounded-2xl glass-panel border border-neutral-200 dark:border-neutral-800">
-        <div class="p-4 rounded-xl bg-neutral-100/80 dark:bg-neutral-900/50 hover:border-emerald-500 border border-transparent transition-all flex items-center justify-between text-left group">
-          <a href="https://wa.me/79270938818" target="_blank" class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-              <i data-lucide="phone-call" class="w-5 h-5"></i>
-            </div>
-            <div>
-              <div class="text-[10px] font-mono text-neutral-500 uppercase">WhatsApp Official</div>
-              <div class="text-xs font-bold text-slate-900 dark:text-white">+7 927 093-88-18</div>
-            </div>
-          </a>
-          <button onclick="copyToClipboard('+7 927 093-88-18', 'WhatsApp Phone')" class="text-neutral-400 hover:text-emerald-500 p-2" title="Copy Phone Number">
-            <i data-lucide="copy" class="w-4 h-4"></i>
-          </button>
-        </div>
-
-        <div class="p-4 rounded-xl bg-neutral-100/80 dark:bg-neutral-900/50 hover:border-sky-500 border border-transparent transition-all flex items-center justify-between text-left group">
-          <a href="mailto:support@deloygame.xyz" class="flex items-center gap-3 truncate">
-            <div class="w-10 h-10 rounded-lg bg-sky-500/10 text-sky-500 flex items-center justify-center shrink-0">
-              <i data-lucide="mail" class="w-5 h-5"></i>
-            </div>
-            <div class="truncate">
-              <div class="text-[10px] font-mono text-neutral-500 uppercase">Official Email</div>
-              <div class="text-xs font-bold text-slate-900 dark:text-white truncate">support@deloygame.xyz</div>
-            </div>
-          </a>
-          <button onclick="copyToClipboard('support@deloygame.xyz', 'Official Email')" class="text-neutral-400 hover:text-sky-500 p-2" title="Copy Email">
-            <i data-lucide="copy" class="w-4 h-4"></i>
-          </button>
-        </div>
-
-        <div class="p-4 rounded-xl bg-neutral-100/80 dark:bg-neutral-900/50 hover:border-purple-500 border border-transparent transition-all flex items-center justify-between text-left group">
-          <a href="https://deloygame.xyz" target="_blank" class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
-              <i data-lucide="globe" class="w-5 h-5"></i>
-            </div>
-            <div>
-              <div class="text-[10px] font-mono text-neutral-500 uppercase">Portal Website</div>
-              <div class="text-xs font-bold text-slate-900 dark:text-white">deloygame.xyz</div>
-            </div>
-          </a>
-          <button onclick="copyToClipboard('https://deloygame.xyz', 'Website URL')" class="text-neutral-400 hover:text-purple-500 p-2" title="Copy Website Link">
-            <i data-lucide="copy" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Interactive Ecosystem Architecture Diagram Section -->
-  <section class="py-20 px-4 sm:px-8 relative z-10" id="architecture">
-    <div class="max-w-7xl mx-auto">
-      <div class="text-center mb-16">
-        <div class="text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2" data-i18n="arch_subtitle">Mesh Core Architecture</div>
-        <h2 class="font-heading text-3xl sm:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" data-i18n="arch_title">Integrated DeLoY Mesh Flow</h2>
-        <p class="text-slate-600 dark:text-neutral-300 max-w-2xl mx-auto text-sm mt-3" data-i18n="arch_desc">
-          Click any ecosystem node to inspect real-time component protocols, data encryption layers, and direct sync channels.
-        </p>
-      </div>
-
-      <!-- Diagram Nodes Canvas Frame -->
-      <div class="rounded-3xl glass-panel p-8 border border-neutral-200 dark:border-neutral-800 shadow-2xl relative overflow-hidden">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-          
-          <!-- Node 1: DeLoY Social Engine -->
-          <div onclick="selectArchNode('social')" id="node-social" class="cursor-pointer p-6 rounded-2xl glass-card border border-neutral-300 dark:border-neutral-700 hover:border-sky-500 dark:hover:border-sky-400 transition-all hover:scale-105 group relative">
-            <div class="w-12 h-12 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center mb-4">
-              <i data-lucide="messages-square" class="w-6 h-6"></i>
-            </div>
-            <h3 class="font-heading text-xl font-bold text-slate-900 dark:text-white mb-2">DeLoY Social Engine</h3>
-            <p class="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed">
-              Hybrid messaging matrix (WhatsApp E2EE) + Stories & Media Streaming (Instagram Feed).
-            </p>
-            <div class="mt-4 flex items-center gap-2 text-[11px] font-mono text-sky-500 font-semibold">
-              <span>Inspect Node Protocol</span> <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
-            </div>
-          </div>
-
-          <!-- Central Core Node: DeLoY Auth & Cloud Matrix -->
-          <div onclick="selectArchNode('cloud')" id="node-cloud" class="cursor-pointer p-6 rounded-2xl bg-neutral-900 text-white dark:bg-white dark:text-black shadow-2xl border-2 border-emerald-500 transition-all hover:scale-105 group relative">
-            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 dark:bg-emerald-500/20 dark:text-emerald-700 flex items-center justify-center mb-4">
-              <i data-lucide="cpu" class="w-6 h-6"></i>
-            </div>
-            <h3 class="font-heading text-xl font-bold mb-2">DeLoY Cloud & Auth Core</h3>
-            <p class="text-xs opacity-80 leading-relaxed">
-              Centralized zero-knowledge identity, instant cross-app telemetry, and session authorization.
-            </p>
-            <div class="mt-4 flex items-center gap-2 text-[11px] font-mono text-emerald-400 dark:text-emerald-700 font-semibold">
-              <span>Central Core Matrix</span> <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-            </div>
-          </div>
-
-          <!-- Node 3: DeLoYGame Portal -->
-          <div onclick="selectArchNode('game')" id="node-game" class="cursor-pointer p-6 rounded-2xl glass-card border border-neutral-300 dark:border-neutral-700 hover:border-purple-500 dark:hover:border-purple-400 transition-all hover:scale-105 group relative">
-            <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-4">
-              <i data-lucide="gamepad-2" class="w-6 h-6"></i>
-            </div>
-            <h3 class="font-heading text-xl font-bold text-slate-900 dark:text-white mb-2">DeLoYGame Hub</h3>
-            <p class="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed">
-              High-throughput multiplayer lobby, cloud leaderboards, and web-based games (deloygame.xyz).
-            </p>
-            <div class="mt-4 flex items-center gap-2 text-[11px] font-mono text-purple-500 font-semibold">
-              <span>Inspect Node Protocol</span> <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Dynamic Node Detail Panel -->
-        <div id="archDetailPanel" class="mt-8 p-6 rounded-2xl bg-neutral-100/90 dark:bg-neutral-900/90 border border-neutral-300 dark:border-neutral-800">
-          <div class="flex items-center gap-3 mb-2">
-            <i data-lucide="info" class="w-5 h-5 text-emerald-500"></i>
-            <h4 id="archDetailTitle" class="font-heading font-bold text-base text-slate-900 dark:text-white">Selected Node: DeLoY Cloud & Auth Core</h4>
-          </div>
-          <p id="archDetailDesc" class="text-xs text-slate-700 dark:text-neutral-300 font-mono leading-relaxed">
-            [CORE PROTOCOL]: Coordinates real-time WebSockets between DeLoY Social and DeLoYGame portal using AES-256 GCM encryption and automated fallback relay nodes.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Live System Telemetry & Network Status Dashboard -->
-  <section class="py-16 px-4 sm:px-8 relative z-10" id="telemetry">
-    <div class="max-w-7xl mx-auto">
-      <div class="rounded-3xl glass-panel p-8 border border-neutral-200 dark:border-neutral-800 shadow-2xl">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 pb-6 border-b border-neutral-200 dark:border-neutral-800">
-          <div>
-            <div class="text-xs font-mono text-emerald-500 font-bold uppercase flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> SYSTEM HEALTH & TELEMETRY
-            </div>
-            <h3 class="font-heading text-2xl font-bold text-slate-900 dark:text-white mt-1">Live Global Mesh Operations</h3>
-          </div>
-          <div class="text-xs font-mono text-neutral-500 bg-neutral-200/60 dark:bg-neutral-800/60 px-4 py-2 rounded-xl">
-            STATUS: <span class="text-emerald-500 font-bold">100% OPERATIONAL</span>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-left">
-          <div class="p-4 rounded-2xl bg-neutral-100/80 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800">
-            <div class="text-[11px] font-mono text-neutral-500 uppercase mb-1">Total System Uptime</div>
-            <div class="font-heading text-2xl font-extrabold text-slate-900 dark:text-white">99.98%</div>
-            <div class="text-[10px] text-emerald-500 font-mono mt-1">+0.02% 30-day index</div>
-          </div>
-
-          <div class="p-4 rounded-2xl bg-neutral-100/80 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800">
-            <div class="text-[11px] font-mono text-neutral-500 uppercase mb-1">Global Active Sessions</div>
-            <div id="statActiveSessions" class="font-heading text-2xl font-extrabold text-slate-900 dark:text-white">14,280</div>
-            <div class="text-[10px] text-sky-500 font-mono mt-1">DeLoYGame + Social Live</div>
-          </div>
-
-          <div class="p-4 rounded-2xl bg-neutral-100/80 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800">
-            <div class="text-[11px] font-mono text-neutral-500 uppercase mb-1">Regional Relay Latency</div>
-            <div class="font-heading text-2xl font-extrabold text-slate-900 dark:text-white">18ms <span class="text-xs font-normal text-neutral-500">(Baku)</span></div>
-            <div class="text-[10px] text-neutral-400 font-mono mt-1">Frankfurt: 28ms | Ashburn: 42ms</div>
-          </div>
-
-          <div class="p-4 rounded-2xl bg-neutral-100/80 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800">
-            <div class="text-[11px] font-mono text-neutral-500 uppercase mb-1">Encrypted Packet Throughput</div>
-            <div id="statThroughput" class="font-heading text-2xl font-extrabold text-slate-900 dark:text-white">2.8 GB/s</div>
-            <div class="text-[10px] text-purple-500 font-mono mt-1">AES-256 E2EE Pipe</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Flagship Projects Section -->
-  <section class="py-20 px-4 sm:px-8 relative z-10" id="projects">
-    <div class="max-w-7xl mx-auto">
-      
-      <!-- Section Header -->
-      <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-        <div>
-          <div class="text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2" data-i18n="projects_subtitle">Portfolio & Innovation</div>
-          <h2 class="font-heading text-3xl sm:text-5xl font-bold text-slate-900 dark:text-white tracking-tight" data-i18n="projects_title">Flagship Ecosystem Products</h2>
-        </div>
-        <p class="text-slate-600 dark:text-neutral-300 max-w-md text-sm leading-relaxed" data-i18n="projects_desc">
-          Building high-throughput digital experiences for interactive gaming and unified mobile social networks.
-        </p>
-      </div>
-
-      <!-- Grid of Cards -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-        <!-- Card 1: DeLoY Social Hybrid App (In Development) -->
-        <div class="tilt-card rounded-3xl p-8 sm:p-10 glass-card flex flex-col justify-between relative overflow-hidden group hover:border-neutral-400 dark:hover:border-neutral-600 transition-all">
-          <div>
-            <!-- Top Status Bar -->
-            <div class="flex items-center justify-between mb-6">
-              <span class="px-3 py-1 rounded-full text-xs font-mono font-medium border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center gap-2">
-                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
-                <span data-i18n="status_in_dev">In Active Development</span>
-              </span>
-              <span class="text-xs font-mono text-neutral-500">v0.9-Alpha</span>
-            </div>
-
-            <!-- Icon Header -->
-            <div class="w-16 h-16 rounded-2xl bg-neutral-900 text-white dark:bg-white dark:text-black flex items-center justify-center mb-6 shadow-xl group-hover:scale-110 transition-transform">
-              <i data-lucide="message-square-plus" class="w-8 h-8"></i>
-            </div>
-
-            <!-- Title & Description -->
-            <h3 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3" data-i18n="project_hybrid_title">
-              DeLoY Unified Messaging & Social App
-            </h3>
-            <p class="text-slate-600 dark:text-neutral-300 text-sm sm:text-base leading-relaxed mb-6" data-i18n="project_hybrid_desc">
-              A next-generation mobile application bridging high-speed real-time messaging (WhatsApp style) with rich multimedia feeds & stories (Instagram style). Powered by end-to-end encryption.
-            </p>
-
-            <!-- Key Feature Chips -->
-            <div class="flex flex-wrap gap-2 mb-8">
-              <span class="px-3 py-1 rounded-lg bg-neutral-200 dark:bg-neutral-800 text-xs font-medium text-slate-800 dark:text-neutral-200">End-to-End Encrypted</span>
-              <span class="px-3 py-1 rounded-lg bg-neutral-200 dark:bg-neutral-800 text-xs font-medium text-slate-800 dark:text-neutral-200">Media Feed & Stories</span>
-              <span class="px-3 py-1 rounded-lg bg-neutral-200 dark:bg-neutral-800 text-xs font-medium text-slate-800 dark:text-neutral-200">VOIP Engine</span>
-            </div>
-          </div>
-
-          <!-- Bottom CTA Block -->
-          <div class="pt-6 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-            <button onclick="openSocialMockupModal()" class="px-5 py-2.5 rounded-xl bg-sky-500 text-white font-semibold text-xs hover:bg-sky-600 transition-colors flex items-center gap-2 shadow-lg">
-              <i data-lucide="smartphone" class="w-4 h-4"></i>
-              <span data-i18n="btn_app_preview">Launch Interactive Mockup</span>
-            </button>
-            <button onclick="openContactModal('DeLoY Social App Waitlist')" class="px-5 py-2.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs hover:opacity-90 transition-opacity flex items-center gap-2">
-              <span data-i18n="btn_join_waitlist">Join Waitlist</span>
-              <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Card 2: DeLoYGame (Launched / Live) -->
-        <div class="tilt-card rounded-3xl p-8 sm:p-10 glass-card flex flex-col justify-between relative overflow-hidden group hover:border-neutral-400 dark:hover:border-neutral-600 transition-all">
-          <div>
-            <!-- Top Status Bar -->
-            <div class="flex items-center justify-between mb-6">
-              <span class="px-3 py-1 rounded-full text-xs font-mono font-medium border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span data-i18n="status_active">Live & Operational</span>
-              </span>
-              <span class="text-xs font-mono text-neutral-500">deloygame.xyz</span>
-            </div>
-
-            <!-- Icon Header -->
-            <div class="w-16 h-16 rounded-2xl bg-neutral-900 text-white dark:bg-white dark:text-black flex items-center justify-center mb-6 shadow-xl group-hover:scale-110 transition-transform">
-              <i data-lucide="gamepad-2" class="w-8 h-8"></i>
-            </div>
-
-            <!-- Title & Description -->
-            <h3 class="font-heading text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3" data-i18n="project_game_title">
-              DeLoYGame Platform
-            </h3>
-            <p class="text-slate-600 dark:text-neutral-300 text-sm sm:text-base leading-relaxed mb-6" data-i18n="project_game_desc">
-              Interactive web and mobile gaming portal developed under DeLoYGroup. Features fast browser games, multiplayer lobbies, and global player leaderboards.
-            </p>
-
-            <!-- Key Feature Chips -->
-            <div class="flex flex-wrap gap-2 mb-8">
-              <span class="px-3 py-1 rounded-lg bg-neutral-200 dark:bg-neutral-800 text-xs font-medium text-slate-800 dark:text-neutral-200">Multiplayer Hub</span>
-              <span class="px-3 py-1 rounded-lg bg-neutral-200 dark:bg-neutral-800 text-xs font-medium text-slate-800 dark:text-neutral-200">Low-Latency Engine</span>
-              <span class="px-3 py-1 rounded-lg bg-neutral-200 dark:bg-neutral-800 text-xs font-medium text-slate-800 dark:text-neutral-200">Cross-Platform</span>
-            </div>
-          </div>
-
-          <!-- Bottom CTA Block -->
-          <div class="pt-6 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-            <span class="text-xs text-neutral-500 font-mono">Official Site: deloygame.xyz</span>
-            <a href="https://deloygame.xyz" target="_blank" class="px-5 py-2.5 rounded-xl border border-neutral-300 dark:border-neutral-700 text-slate-900 dark:text-white font-semibold text-xs hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors flex items-center gap-2">
-              <span data-i18n="btn_explore_game">Launch Game Hub</span>
-              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-            </a>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Interactive Firebase Architecture & Infrastructure Section -->
-  <section class="py-20 px-4 sm:px-8 relative z-10" id="firebase-arch">
-    <div class="max-w-7xl mx-auto">
-      <div class="text-center mb-16">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-xs font-mono font-bold mb-3 border border-amber-500/20">
-          <i data-lucide="flame" class="w-4 h-4"></i> CLOUD DATA ENGINE
-        </div>
-        <h2 class="font-heading text-3xl sm:text-5xl font-bold text-slate-900 dark:text-white tracking-tight">Firebase Cloud Architecture</h2>
-        <p class="text-slate-600 dark:text-neutral-300 max-w-2xl mx-auto text-sm mt-3">
-          How DeLoYGroup leverages Firebase for real-time synchronization across DeLoY Social and DeLoYGame portal.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        
-        <div class="p-6 rounded-3xl glass-card border border-amber-500/30 hover:border-amber-500 transition-all">
-          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4">
-            <i data-lucide="database" class="w-6 h-6"></i>
-          </div>
-          <h3 class="font-heading font-bold text-xl text-slate-900 dark:text-white mb-2">Cloud Firestore</h3>
-          <p class="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed mb-4">
-            Stores encrypted user profiles, WhatsApp-style group chat metadata, and Instagram media post manifests.
-          </p>
-          <span class="text-[10px] font-mono text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-md">Live Sync Enabled</span>
-        </div>
-
-        <div class="p-6 rounded-3xl glass-card border border-sky-500/30 hover:border-sky-500 transition-all">
-          <div class="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-500 flex items-center justify-center mb-4">
-            <i data-lucide="zap" class="w-6 h-6"></i>
-          </div>
-          <h3 class="font-heading font-bold text-xl text-slate-900 dark:text-white mb-2">Realtime DB</h3>
-          <p class="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed mb-4">
-            Powers millisecond-latency presence detection ("Online / Typing...") and arcade multiplayer lobbies.
-          </p>
-          <span class="text-[10px] font-mono text-sky-500 bg-sky-500/10 px-2.5 py-1 rounded-md">&lt; 15ms Latency</span>
-        </div>
-
-        <div class="p-6 rounded-3xl glass-card border border-emerald-500/30 hover:border-emerald-500 transition-all">
-          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
-            <i data-lucide="shield-check" class="w-6 h-6"></i>
-          </div>
-          <h3 class="font-heading font-bold text-xl text-slate-900 dark:text-white mb-2">Firebase Auth</h3>
-          <p class="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed mb-4">
-            Zero-knowledge authentication supporting anonymous session tokens and custom token handshakes.
-          </p>
-          <span class="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-md">AES-256 E2EE</span>
-        </div>
-
-        <div class="p-6 rounded-3xl glass-card border border-purple-500/30 hover:border-purple-500 transition-all">
-          <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-4">
-            <i data-lucide="cloud-upload" class="w-6 h-6"></i>
-          </div>
-          <h3 class="font-heading font-bold text-xl text-slate-900 dark:text-white mb-2">Cloud Storage</h3>
-          <p class="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed mb-4">
-            CDN media bucket for Instagram feed stories, high-res photos, and encrypted audio message payloads.
-          </p>
-          <span class="text-[10px] font-mono text-purple-500 bg-purple-500/10 px-2.5 py-1 rounded-md">CDN Multi-Region</span>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- Interactive Mini-Game Section -->
-  <section class="py-20 px-4 sm:px-8 relative z-10" id="minigame">
-    <div class="max-w-5xl mx-auto">
-      
-      <div class="text-center mb-10">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-mono font-bold mb-3">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> DEBOUNCE CYBER GLITCHES
-        </div>
-        <h2 class="font-heading text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white" data-i18n="game_title">
-          DeLoY Cyber Defense Arcade
-        </h2>
-        <p class="text-slate-600 dark:text-neutral-400 text-sm max-w-xl mx-auto mt-2" data-i18n="game_desc">
-          Test your reaction speed! Pilot the DeLoY cyber vessel and shoot down incoming system bugs before they breach the network.
-        </p>
-      </div>
-
-      <!-- Game Container -->
-      <div class="rounded-3xl glass-panel p-6 sm:p-8 border border-neutral-200 dark:border-neutral-800 shadow-2xl relative overflow-hidden">
-        
-        <!-- Game HUD -->
-        <div class="flex items-center justify-between mb-4 px-2">
-          <div class="flex items-center gap-6">
-            <div>
-              <span class="text-[10px] font-mono text-neutral-500 block uppercase" data-i18n="game_score">SCORE</span>
-              <span id="scoreDisplay" class="font-heading font-extrabold text-xl sm:text-2xl text-emerald-500">0</span>
-            </div>
-            <div>
-              <span class="text-[10px] font-mono text-neutral-500 block uppercase" data-i18n="game_highscore">BEST SCORE</span>
-              <span id="highScoreDisplay" class="font-heading font-bold text-xl sm:text-2xl text-slate-800 dark:text-slate-200">0</span>
-            </div>
-            <div>
-              <span class="text-[10px] font-mono text-neutral-500 block uppercase">POWER-UP</span>
-              <span id="powerUpDisplay" class="font-heading font-bold text-xs text-amber-500 uppercase">NORMAL</span>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-3">
-            <button id="soundToggleBtn" onclick="toggleGameSound()" class="p-2 rounded-xl bg-neutral-200 dark:bg-neutral-800 text-xs font-bold hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors" title="Toggle Sound">
-              <i data-lucide="volume-2" id="soundIcon" class="w-4 h-4"></i>
-            </button>
-            <button onclick="resetGame()" class="px-4 py-2 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-bold text-xs hover:opacity-90 transition-all">
-              <span data-i18n="game_restart">Restart Game</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Canvas Frame -->
-        <div class="relative rounded-2xl overflow-hidden border border-neutral-800 shadow-inner max-w-3xl mx-auto">
-          <canvas id="gameCanvas" class="w-full h-[360px] sm:h-[420px] block"></canvas>
-          
-          <!-- Start / Game Over Overlay -->
-          <div id="gameOverlay" class="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 text-white z-20">
-            <div class="w-16 h-16 rounded-2xl bg-emerald-500 text-black flex items-center justify-center font-bold mb-4 shadow-lg animate-bounce">
-              <i data-lucide="shield-alert" class="w-8 h-8"></i>
-            </div>
-            <h3 id="overlayTitle" class="font-heading text-2xl sm:text-3xl font-extrabold mb-2">DeLoY Cyber Defense</h3>
-            <p id="overlaySub" class="text-xs sm:text-sm text-neutral-300 max-w-md mb-6">Use Left/Right arrow keys, A/D, or tap side controls to shoot down invading system glitches and collect multi-shot powerups.</p>
-            <button onclick="startGame()" class="px-8 py-3.5 rounded-xl bg-emerald-500 text-black font-extrabold text-sm hover:bg-emerald-400 transition-all transform hover:scale-105 shadow-xl flex items-center gap-2">
-              <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-              <span id="overlayBtnText" data-i18n="game_start_btn">START DEFENSE</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Firebase Realtime Global High Score Leaderboard -->
-        <div class="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-800">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
-              <i data-lucide="trophy" class="w-5 h-5 text-amber-500"></i>
-              <h4 class="font-heading font-bold text-slate-900 dark:text-white text-base">Firebase Global Realtime Leaderboard</h4>
-            </div>
-            <span class="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-md">Live Sync</span>
-          </div>
-
-          <div id="firebaseLeaderboardList" class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
-            <div class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-              <span class="text-neutral-400">1. Anonymous Pilot</span>
-              <span class="font-bold text-amber-500">520 pts</span>
-            </div>
-            <div class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-              <span class="text-neutral-400">2. Rafiq Qadirov</span>
-              <span class="font-bold text-amber-500">480 pts</span>
-            </div>
-            <div class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-              <span class="text-neutral-400">3. DeLoY Agent</span>
-              <span class="font-bold text-amber-500">390 pts</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mobile / Touch Arcade Controller -->
-        <div class="flex items-center justify-between gap-4 mt-6 max-w-md mx-auto">
-          <button id="btnLeft" class="flex-1 py-3 rounded-xl bg-neutral-200 dark:bg-neutral-800 text-slate-900 dark:text-white font-bold text-sm active:bg-neutral-400 dark:active:bg-neutral-700 transition-colors flex items-center justify-center gap-1 select-none">
-            <i data-lucide="arrow-left" class="w-5 h-5"></i> LEFT
-          </button>
-          <button id="btnShoot" class="flex-1 py-3 rounded-xl bg-emerald-500 text-black font-extrabold text-sm active:bg-emerald-400 transition-colors flex items-center justify-center gap-1 select-none">
-            <i data-lucide="crosshair" class="w-5 h-5"></i> SHOOT
-          </button>
-          <button id="btnRight" class="flex-1 py-3 rounded-xl bg-neutral-200 dark:bg-neutral-800 text-slate-900 dark:text-white font-bold text-sm active:bg-neutral-400 dark:active:bg-neutral-700 transition-colors flex items-center justify-center gap-1 select-none">
-            RIGHT <i data-lucide="arrow-right" class="w-5 h-5"></i>
-          </button>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Founder & Leadership Section -->
-  <section class="py-20 px-4 sm:px-8 relative z-10" id="founder">
-    <div class="max-w-6xl mx-auto">
-      <div class="rounded-3xl glass-panel p-8 sm:p-12 md:p-16 relative overflow-hidden shadow-2xl">
-        
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          
-          <!-- Founder Avatar Card -->
-          <div class="lg:col-span-5 flex justify-center">
-            <div class="relative group">
-              <div class="w-60 h-60 sm:w-64 sm:h-64 rounded-3xl bg-gradient-to-tr from-neutral-900 to-black border-2 border-neutral-300 dark:border-neutral-700 flex flex-col items-center justify-center p-6 text-center shadow-2xl relative overflow-hidden">
-                
-                <!-- Glowing Monogram -->
-                <div class="w-20 h-20 rounded-2xl bg-white text-black font-heading text-4xl font-black flex items-center justify-center mb-4 shadow-xl">
-                  RQ
-                </div>
-                
-                <h4 class="font-heading font-bold text-xl text-white">Rafiq Qadirov</h4>
-                <p class="text-xs font-mono text-neutral-400 mt-1">alias <span class="text-white font-bold">@deloy</span></p>
-                <div class="mt-3 px-3 py-1 rounded-full bg-neutral-800 border border-neutral-700 text-[10px] font-mono text-neutral-300 uppercase" data-i18n="founder_title">
-                  FOUNDER & CHIEF ARCHITECT
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Bio & Contact Info -->
-          <div class="lg:col-span-7 flex flex-col justify-center">
-            <div class="text-xs font-mono text-neutral-500 uppercase tracking-widest mb-3" data-i18n="founder_subtitle">
-              LEADERSHIP & VISION
-            </div>
-            
-            <h2 class="font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mb-6" data-i18n="founder_head">
-              Rafiq Qadirov (deloy)
-            </h2>
-            
-            <p class="text-slate-600 dark:text-neutral-300 text-sm sm:text-base leading-relaxed mb-6" data-i18n="founder_bio">
-              As the founder and chief architect of DeLoYGroup, Rafiq Qadirov leads the design and development of innovative web applications, gaming portals (deloygame.xyz), and unified social ecosystems.
-            </p>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 pt-4 border-t border-neutral-200 dark:border-neutral-800">
-              <div class="flex items-center gap-3">
-                <i data-lucide="message-circle" class="w-5 h-5 text-emerald-500"></i>
-                <div class="text-xs">
-                  <span class="block text-neutral-500">WhatsApp Official:</span>
-                  <a href="https://wa.me/79270938818" target="_blank" class="font-bold text-slate-900 dark:text-white hover:underline">+7 927 093-88-18</a>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-3">
-                <i data-lucide="mail" class="w-5 h-5 text-sky-500"></i>
-                <div class="text-xs truncate">
-                  <span class="block text-neutral-500">Official Email:</span>
-                  <a href="mailto:support@deloygame.xyz" class="font-bold text-slate-900 dark:text-white hover:underline truncate">support@deloygame.xyz</a>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap gap-4 items-center">
-              <button onclick="openContactModal('Direct Contact with Rafiq Qadirov')" class="px-6 py-3 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-semibold text-xs sm:text-sm hover:opacity-90 transition-opacity flex items-center gap-2">
-                <i data-lucide="send" class="w-4 h-4"></i>
-                <span data-i18n="btn_contact_founder">Contact Founder</span>
-              </button>
-
-              <a href="https://deloygame.xyz" target="_blank" class="px-6 py-3 rounded-xl border border-neutral-300 dark:border-neutral-700 text-slate-900 dark:text-white font-semibold text-xs sm:text-sm hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors flex items-center gap-2">
-                <i data-lucide="globe" class="w-4 h-4"></i>
-                <span>Visit deloygame.xyz</span>
-              </a>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- Interactive DeLoY Social Preview Smartphone Modal -->
-  <div id="socialMockupModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-    <div class="max-w-md w-full bg-neutral-950 text-white rounded-[40px] border-4 border-neutral-800 shadow-2xl relative overflow-hidden flex flex-col h-[680px]">
-      
-      <!-- Top Speaker Notch -->
-      <div class="w-32 h-5 bg-neutral-800 rounded-b-xl mx-auto flex items-center justify-center gap-2 px-3">
-        <div class="w-10 h-1.5 bg-neutral-600 rounded-full"></div>
-        <div class="w-2 h-2 bg-neutral-700 rounded-full"></div>
-      </div>
-
-      <!-- Phone App Header -->
-      <div class="p-4 border-b border-neutral-800 flex items-center justify-between bg-neutral-900/80">
-        <div class="flex items-center gap-2">
-          <div class="w-7 h-7 rounded-lg bg-sky-500 text-black font-extrabold flex items-center justify-center text-xs">D</div>
-          <span class="font-heading font-bold text-sm">DeLoY Social</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="text-[10px] font-mono bg-sky-500/20 text-sky-400 px-2 py-0.5 rounded-md">WhatsApp + Insta Hybrid</span>
-          <button onclick="closeSocialMockupModal()" class="text-neutral-400 hover:text-white p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
-        </div>
-      </div>
-
-      <!-- Tab Buttons (Messaging vs Feed) -->
-      <div class="grid grid-cols-2 text-center text-xs font-semibold border-b border-neutral-800 bg-neutral-900">
-        <button id="tabBtnMsg" onclick="switchPhoneTab('messages')" class="py-3 text-sky-400 border-b-2 border-sky-400 flex items-center justify-center gap-1.5">
-          <i data-lucide="message-square" class="w-4 h-4"></i> WhatsApp Chats
-        </button>
-        <button id="tabBtnFeed" onclick="switchPhoneTab('feed')" class="py-3 text-neutral-400 border-b-2 border-transparent flex items-center justify-center gap-1.5">
-          <i data-lucide="instagram" class="w-4 h-4"></i> Insta Feed
-        </button>
-      </div>
-
-      <!-- Tab Content Area -->
-      <div class="flex-1 overflow-y-auto p-4 space-y-4">
-        
-        <!-- Tab 1: Messages View -->
-        <div id="phoneViewMessages" class="space-y-3">
-          <div class="p-3 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">RQ</div>
-              <div>
-                <div class="text-xs font-bold">Rafiq Qadirov (deloy)</div>
-                <div class="text-[10px] text-neutral-400">DeLoY Mesh core deployed successfully!</div>
-              </div>
-            </div>
-            <span class="text-[9px] font-mono text-neutral-500">12:42</span>
-          </div>
-
-          <!-- Audio Message Card -->
-          <div class="p-3 rounded-2xl bg-neutral-900 border border-neutral-800 space-y-2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="font-bold text-sky-400">Voice Note • End-to-End Encrypted</span>
-              <span class="text-[10px] font-mono text-neutral-500">0:24</span>
-            </div>
-            <div class="flex items-center gap-3">
-              <button class="w-8 h-8 rounded-full bg-sky-500 text-black flex items-center justify-center"><i data-lucide="play" class="w-4 h-4 fill-current"></i></button>
-              <div class="flex items-center gap-1 flex-1">
-                <div class="w-1 bg-sky-400 audio-wave-bar"></div>
-                <div class="w-1 bg-sky-400 audio-wave-bar" style="animation-delay: 0.2s"></div>
-                <div class="w-1 bg-sky-400 audio-wave-bar" style="animation-delay: 0.4s"></div>
-                <div class="w-1 bg-sky-400 audio-wave-bar" style="animation-delay: 0.1s"></div>
-                <div class="w-1 bg-sky-400 audio-wave-bar" style="animation-delay: 0.3s"></div>
-                <div class="w-1 bg-sky-400 audio-wave-bar" style="animation-delay: 0.5s"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab 2: Stories / Instagram Feed View -->
-        <div id="phoneViewFeed" class="hidden space-y-4">
-          <!-- Story Bubbles -->
-          <div class="flex items-center gap-3 overflow-x-auto pb-2 border-b border-neutral-800">
-            <div class="text-center shrink-0">
-              <div class="w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-amber-500 to-purple-500"><div class="w-full h-full bg-neutral-900 rounded-full flex items-center justify-center text-xs font-bold">You</div></div>
-              <span class="text-[10px] text-neutral-400 mt-1 block">Your Story</span>
-            </div>
-            <div class="text-center shrink-0">
-              <div class="w-12 h-12 rounded-full p-0.5 bg-gradient-to-tr from-sky-500 to-emerald-500"><div class="w-full h-full bg-neutral-900 rounded-full flex items-center justify-center text-xs font-bold">RQ</div></div>
-              <span class="text-[10px] text-neutral-400 mt-1 block">deloy</span>
-            </div>
-          </div>
-
-          <!-- Feed Post -->
-          <div class="rounded-2xl bg-neutral-900 border border-neutral-800 overflow-hidden">
-            <div class="p-3 flex items-center gap-2">
-              <div class="w-7 h-7 rounded-full bg-purple-500 text-white font-bold text-xs flex items-center justify-center">D</div>
-              <span class="text-xs font-bold">deloygame_official</span>
-            </div>
-            <div class="h-40 bg-gradient-to-tr from-neutral-800 to-neutral-900 flex flex-col items-center justify-center p-4 text-center">
-              <i data-lucide="gamepad-2" class="w-10 h-10 text-emerald-400 mb-2"></i>
-              <span class="font-heading font-extrabold text-sm">DeLoY Cyber Defense Arcade</span>
-            </div>
-            <div class="p-3 flex items-center justify-between text-neutral-400">
-              <div class="flex items-center gap-3">
-                <i data-lucide="heart" class="w-5 h-5 text-rose-500 fill-rose-500"></i>
-                <i data-lucide="message-circle" class="w-5 h-5"></i>
-                <i data-lucide="send" class="w-5 h-5"></i>
-              </div>
-              <i data-lucide="bookmark" class="w-5 h-5"></i>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="p-3 bg-neutral-900 border-t border-neutral-800 text-center">
-        <button onclick="openContactModal('DeLoY Social Beta Testing')" class="w-full py-2.5 rounded-xl bg-sky-500 text-white font-bold text-xs">Request Beta Access</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Contact & Footer Section -->
-  <footer class="py-16 px-4 sm:px-8 border-t border-neutral-200 dark:border-neutral-800 relative z-10 glass-panel" id="contact">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-      
-      <div>
-        <a href="#" class="flex items-center gap-3 mb-3">
-          <div class="w-8 h-8 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-black font-extrabold font-heading text-lg flex items-center justify-center">
-            D
-          </div>
-          <span class="font-heading font-bold text-lg text-slate-900 dark:text-white">DeLoYGroup</span>
-        </a>
-        <p class="text-xs text-slate-500 dark:text-neutral-400 max-w-sm" data-i18n="footer_copy">
-          © 2026 DeLoYGroup. Founded by Rafiq Qadirov (deloy). All rights reserved.
-        </p>
-      </div>
-
-      <div class="flex flex-wrap items-center gap-6 text-xs sm:text-sm font-semibold">
-        <a href="https://wa.me/79270938818" target="_blank" class="text-slate-700 dark:text-neutral-300 hover:text-emerald-500 transition-colors flex items-center gap-1.5">
-          <i data-lucide="phone-call" class="w-4 h-4"></i>
-          <span>+7 927 093-88-18</span>
-        </a>
-        <a href="mailto:support@deloygame.xyz" class="text-slate-700 dark:text-neutral-300 hover:text-sky-500 transition-colors flex items-center gap-1.5">
-          <i data-lucide="mail" class="w-4 h-4"></i>
-          <span>support@deloygame.xyz</span>
-        </a>
-        <a href="https://deloygame.xyz" target="_blank" class="text-slate-700 dark:text-neutral-300 hover:text-purple-500 transition-colors flex items-center gap-1.5">
-          <i data-lucide="globe" class="w-4 h-4"></i>
-          <span>deloygame.xyz</span>
-        </a>
-      </div>
-
-    </div>
-  </footer>
-
-  <!-- Contact Modal -->
-  <div id="contactModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
-    <div class="max-w-lg w-full rounded-3xl glass-panel p-8 relative shadow-2xl">
-      
-      <!-- Close Button -->
-      <button onclick="closeContactModal()" class="absolute top-6 right-6 text-neutral-500 hover:text-black dark:hover:text-white">
-        <i data-lucide="x" class="w-6 h-6"></i>
-      </button>
-
-      <h3 class="font-heading text-2xl font-bold text-slate-900 dark:text-white mb-2" id="modalSubjectTitle">
-        Send Message to DeLoYGroup
-      </h3>
-      <p class="text-xs text-neutral-500 mb-6" data-i18n="modal_subtitle">
-        Direct routing to Rafiq Qadirov & the development team via Firebase.
-      </p>
-
-      <form id="contactForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-mono text-neutral-500 mb-1" data-i18n="form_name">YOUR NAME</label>
-          <input id="inputName" type="text" required placeholder="Alex Mercer" class="w-full px-4 py-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-neutral-500">
-        </div>
-
-        <div>
-          <label class="block text-xs font-mono text-neutral-500 mb-1" data-i18n="form_email">YOUR EMAIL</label>
-          <input id="inputEmail" type="email" required placeholder="alex@example.com" class="w-full px-4 py-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-neutral-500">
-        </div>
-
-        <div>
-          <label class="block text-xs font-mono text-neutral-500 mb-1" data-i18n="form_message">MESSAGE</label>
-          <textarea id="inputMsg" rows="4" required placeholder="Write your inquiry or partnership request..." class="w-full px-4 py-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-neutral-500"></textarea>
-        </div>
-
-        <button type="submit" class="w-full py-4 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
-          <i data-lucide="send" class="w-4 h-4"></i>
-          <span data-i18n="btn_send">Send Message to Firebase</span>
-        </button>
-      </form>
-
-      <div id="modalSuccess" class="hidden text-center py-8 space-y-3">
-        <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto">
-          <i data-lucide="check" class="w-6 h-6"></i>
-        </div>
-        <h4 class="font-heading text-lg font-bold text-slate-900 dark:text-white" data-i18n="form_sent_title">Message Sent Successfully</h4>
-        <p class="text-xs text-neutral-500" data-i18n="form_sent_desc">Saved to Firebase Cloud. Rafiq Qadirov or the team will get back to you shortly.</p>
-        <button onclick="closeContactModal()" class="px-6 py-2.5 rounded-xl bg-neutral-800 text-white text-xs font-medium">Close</button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- JavaScript Logic & Firebase Handlers -->
+  <!-- MAIN SCRIPT ENGINE -->
   <script>
-    // Global Multi-Language Translation Dictionary (16 Languages)
-    const translations = {
-      EN: {
-        nav_about: "About",
-        nav_projects: "Projects",
-        nav_arch: "Ecosystem",
-        nav_telemetry: "Live Mesh",
-        nav_game: "Cyber Game",
-        nav_founder: "Leadership",
-        nav_contact: "Contact",
-        hero_badge: "BUILDING NEXT-GEN DIGITAL ECOSYSTEMS",
-        hero_title1: "ARCHITECTING THE",
-        hero_title2: "FUTURE OF SOCIAL & GAMING",
-        hero_sub: "DeLoYGroup is an independent tech conglomerate specializing in interactive gaming platforms and unified social communication networks. Founded & engineered by Rafiq Qadirov (deloy).",
-        btn_app_preview: "Preview Hybrid App",
-        arch_subtitle: "Mesh Core Architecture",
-        arch_title: "Integrated DeLoY Mesh Flow",
-        arch_desc: "Click any ecosystem node to inspect real-time component protocols, data encryption layers, and direct sync channels.",
-        projects_subtitle: "Portfolio & Innovation",
-        projects_title: "Flagship Ecosystem Products",
-        projects_desc: "Building high-throughput digital experiences for interactive gaming and unified mobile social networks.",
-        status_in_dev: "In Active Development",
-        project_hybrid_title: "DeLoY Unified Messaging & Social App",
-        project_hybrid_desc: "A next-generation mobile application bridging high-speed real-time messaging (WhatsApp style) with rich multimedia feeds & stories (Instagram style). Powered by end-to-end encryption.",
-        project_hybrid_eta: "Estimated Beta Launch: Q4 2026",
-        btn_join_waitlist: "Join Waitlist",
-        status_active: "Live & Operational",
-        project_game_title: "DeLoYGame Platform",
-        project_game_desc: "Interactive web and mobile gaming portal developed under DeLoYGroup. Features fast browser games, multiplayer lobbies, and global player leaderboards.",
-        btn_explore_game: "Launch Game Hub",
-        game_title: "DeLoY Cyber Defense Arcade",
-        game_desc: "Test your reaction speed! Pilot the DeLoY cyber vessel and shoot down incoming system bugs before they breach the network.",
-        game_score: "SCORE",
-        game_highscore: "BEST SCORE",
-        game_restart: "Restart Game",
-        game_start_btn: "START DEFENSE",
-        founder_subtitle: "LEADERSHIP & VISION",
-        founder_head: "Rafiq Qadirov (deloy)",
-        founder_title: "FOUNDER & CHIEF ARCHITECT",
-        founder_bio: "As the founder and chief architect of DeLoYGroup, Rafiq Qadirov leads the design and development of innovative web applications, gaming portals (deloygame.xyz), and unified social ecosystems.",
-        btn_contact_founder: "Contact Founder",
-        footer_copy: "© 2026 DeLoYGroup. Founded by Rafiq Qadirov (deloy). All rights reserved.",
-        modal_subtitle: "Direct routing to Rafiq Qadirov & the development team.",
-        form_name: "YOUR NAME",
-        form_email: "YOUR EMAIL",
-        form_message: "MESSAGE",
-        btn_send: "Send Message",
-        form_sent_title: "Message Sent Successfully",
-        form_sent_desc: "Thank you! Rafiq Qadirov or the team will get back to you shortly."
-      },
-      RU: {
-        nav_about: "О компании",
-        nav_projects: "Проекты",
-        nav_arch: "Экосистема",
-        nav_telemetry: "Сеть Live",
-        nav_game: "Мини-Игра",
-        nav_founder: "Руководство",
-        nav_contact: "Контакты",
-        hero_badge: "СОЗДАНИЕ ЦИФРОВЫХ ЭКОСИСТЕМ НОВОГО ПОКОЛЕНИЯ",
-        hero_title1: "ПРОЕКТИРУЕМ",
-        hero_title2: "БУДУЩЕЕ СОЦСЕТЕЙ И ГЕЙМИНГА",
-        hero_sub: "DeLoYGroup — независимая технологическая компания, создающая интерактивные игровые платформы и объединенные социальные сети. Основатель — Рафик Кадиров (deloy).",
-        btn_app_preview: "Предпросмотр Соцсети",
-        arch_subtitle: "Архитектура Сети",
-        arch_title: "Интегрированная Сеть DeLoY",
-        arch_desc: "Нажмите на любой узел экосистемы для просмотра протоколов шифрования и каналов синхронизации.",
-        projects_subtitle: "Портфолио и Инновации",
-        projects_title: "Флагманские Продукты",
-        projects_desc: "Высокопроизводительные сервисы для интерактивных развлечений и объединения мессенджера и социальных сетей.",
-        status_in_dev: "В активной разработке",
-        project_hybrid_title: "Гибридный Мессенджер + Соцсеть DeLoY",
-        project_hybrid_desc: "Инновационное мобильное приложение, сочетающее мгновенный чат (в стиле WhatsApp) и ленту медиа / сторис (в стиле Instagram).",
-        project_hybrid_eta: "Ориентировочный запуск Бета: Q4 2026",
-        btn_join_waitlist: "Вступить в лист ожидания",
-        status_active: "Работает и Доступен",
-        project_game_title: "Игровая Платформа DeLoYGame",
-        project_game_desc: "Интерактивный игровой портал от DeLoYGroup. Браузерные игры, онлайн-соревнования и игровое сообщество.",
-        btn_explore_game: "Запустить Игровой Хаб",
-        game_title: "Аркада DeLoY Cyber Defense",
-        game_desc: "Проверьте свою реакцию! Управляйте кибер-кораблем DeLoY и уничтожайте сбои в сети.",
-        game_score: "СЧЕТ",
-        game_highscore: "РЕКОРД",
-        game_restart: "Перезапуск",
-        game_start_btn: "НАЧАТЬ ИГРУ",
-        founder_subtitle: "РУКОВОДСТВО И ВИДЕНИЕ",
-        founder_head: "Рафик Кадиров (deloy)",
-        founder_title: "ОСНОВАТЕЛЬ И ГЛАВНЫЙ АРХИТЕКТОР",
-        founder_bio: "Рафик Кадиров (deloy) — основатель DeLoYGroup, разработчик DeLoYGame (deloygame.xyz) и создатель экосистемы объединенных социальных приложений.",
-        btn_contact_founder: "Связаться с Основателем",
-        footer_copy: "© 2026 DeLoYGroup. Основатель: Рафик Кадиров (deloy). Все права защищены.",
-        modal_subtitle: "Запросы отправляются напрямую Рафику Кадирову и команде разработки.",
-        form_name: "ВАШЕ ИМЯ",
-        form_email: "ВАШ EMAIL",
-        form_message: "СООБЩЕНИЕ",
-        btn_send: "Отправить Сообщение",
-        form_sent_title: "Сообщение Успешно Отправлено",
-        form_sent_desc: "Спасибо! Рафик Кадиров или команда свяжутся с вами в ближайшее время."
-      },
-      AZ: {
-        nav_about: "Haqqımızda",
-        nav_projects: "Layihələr",
-        nav_arch: "Ekosistem",
-        nav_telemetry: "Canlı Şəbəkə",
-        nav_game: "Kiber Oyun",
-        nav_founder: "Rəhbərlik",
-        nav_contact: "Əlaqə",
-        hero_badge: "YENİ NƏSİL RƏQƏMSAL EKOSİSTEMLƏRİN YARADILMASI",
-        hero_title1: "QURURUZ",
-        hero_title2: "SOSİAL VƏ OYUN SEKTORUNUN GƏLƏCƏYİNİ",
-        hero_sub: "DeLoYGroup — interaktiv oyun platformaları və birləşdirilmiş sosial rabitə şəbəkələri üzrə ixtisaslaşmış müstəqil şirkətdir. Təsisçi: Rafiq Qadırov (deloy).",
-        btn_app_preview: "Sosial Tətbiq Baxış",
-        arch_subtitle: "Şəbəkə Arxitekturası",
-        arch_title: "DeLoY İnteqrasiya Edilmiş Axın",
-        arch_desc: "Protokolları və məlumat axınını təftiş etmək üçün hər hansı bir qovşağa klikləyin.",
-        projects_subtitle: "Portfel və İnnovasiya",
-        projects_title: "Əsas Ekosistem Məhsulları",
-        projects_desc: "İnteraktiv əyləncə və vahid mobil rabitə üçün yüksək sürətli rəqəmsal təcrübələrin qurulması.",
-        status_in_dev: "Aktiv İşlənmə Mərhələsində",
-        project_hybrid_title: "DeLoY Birləşdirilmiş Mesajlaşma və Sosial Şəbəkə",
-        project_hybrid_desc: "WhatsApp üslubunda sürətli mesajlaşma və Instagram üslubunda zəngin media lenti/hekayələri birləşdirən yeni nəsil tətbiq.",
-        project_hybrid_eta: "Təxmini Beta Buraxılışı: Q4 2026",
-        btn_join_waitlist: "Gözləmə Siyahısına Qoşul",
-        status_active: "Aktiv və Əlçatandır",
-        project_game_title: "DeLoYGame Platforması",
-        project_game_desc: "DeLoYGroup tərəfindən hazırlanmış interaktiv oyun portalı. Brauzer oyunları və real vaxt reytingləri.",
-        btn_explore_game: "Oyun Portalına Keç",
-        game_title: "DeLoY Kiber Müdafiə Arkada",
-        game_desc: "Reaksiya sürətinizi yoxlayın! DeLoY gəmisini idarə edin və şəbəkə xətalarını məhv edin.",
-        game_score: "XAL",
-        game_highscore: "REKORD",
-        game_restart: "Yenidən Başla",
-        game_start_btn: "OYUNA BAŞLA",
-        founder_subtitle: "RƏHBƏRLİK VƏ VİZYON",
-        founder_head: "Rafiq Qadırov (deloy)",
-        founder_title: "TƏSİSÇİ VƏ BAŞ ARXİTEKTOR",
-        founder_bio: "DeLoYGroup-un təsisçisi Rafiq Qadırov (deloy) innovativ veb tətbiqlərin və DeLoYGame (deloygame.xyz) portalının memarıdır.",
-        btn_contact_founder: "Təsisçi ilə Əlaqə",
-        footer_copy: "© 2026 DeLoYGroup. Təsisçi: Rafiq Qadırov (deloy). Bütün hüquqlar qorunur.",
-        modal_subtitle: "Sorğular birbaşa Rafiq Qadırova və komandaya yönləndirilir.",
-        form_name: "ADINIZ",
-        form_email: "E-POÇTUNUZ",
-        form_message: "MESAJINIZ",
-        btn_send: "Mesajı Göndər",
-        form_sent_title: "Mesaj Uğurla Göndərildi",
-        form_sent_desc: "Təşəkkür edirik! Tezliklə sizinlə əlaqə saxlayacağıq."
-      },
-      PT: { nav_about: "Sobre", nav_projects: "Projetos", nav_arch: "Ecossistema", nav_telemetry: "Rede", nav_game: "Jogo", nav_founder: "Liderança", nav_contact: "Contato", hero_badge: "CRIANDO ECOSSISTEMAS DIGITAIS", hero_title1: "PROJETANDO O", hero_title2: "FUTURO SOCIAL E DE JOGOS", hero_sub: "DeLoYGroup é um conglomerado de tecnologia independente fundado por Rafiq Qadirov (deloy).", btn_app_preview: "Ver Mockup do App", projects_subtitle: "Portfólio", projects_title: "Produtos Principais", projects_desc: "Experiências digitais de alta velocidade.", status_in_dev: "Em Desenvolvimento", project_hybrid_title: "Rede Social e Mensagens Unificadas", project_hybrid_desc: "WhatsApp + Instagram hybrid app.", project_hybrid_eta: "Beta: Q4 2026", btn_join_waitlist: "Entrar na Lista", status_active: "Ativo", project_game_title: "Plataforma DeLoYGame", project_game_desc: "Portal de jogos interativos.", btn_explore_game: "Abrir Hub", game_title: "DeLoY Cyber Defense", game_desc: "Pilote a nave DeLoY e destrua os bugs!", game_score: "PONTOS", game_highscore: "RECORDE", game_restart: "Reiniciar", game_start_btn: "INICIAR JOGO", founder_subtitle: "LIDERANÇA", founder_head: "Rafiq Qadirov (deloy)", founder_title: "FUNDADOR", founder_bio: "Fundador do DeLoYGroup.", btn_contact_founder: "Contatar Fundador", footer_copy: "© 2026 DeLoYGroup. Fundado por Rafiq Qadirov (deloy).", modal_subtitle: "Direto para Rafiq Qadirov.", form_name: "NOME", form_email: "EMAIL", form_message: "MENSAGEM", btn_send: "Enviar", form_sent_title: "Enviado", form_sent_desc: "Obrigado!" },
-      ES: { nav_about: "Nosotros", nav_projects: "Proyectos", nav_arch: "Ecosistema", nav_telemetry: "Red Live", nav_game: "Juego", nav_founder: "Liderazgo", nav_contact: "Contacto", hero_badge: "CREANDO ECOSISTEMAS DIGITALES", hero_title1: "DISEÑANDO EL", hero_title2: "FUTURO SOCIAL Y DE JUEGOS", hero_sub: "DeLoYGroup es un conglomerado tecnológico fundado por Rafiq Qadirov (deloy).", btn_app_preview: "Vista de App", projects_subtitle: "Portafolio", projects_title: "Productos Principales", projects_desc: "Experiencias digitales para juegos y redes sociales.", status_in_dev: "En Desarrollo", project_hybrid_title: "Red Social Unificada DeLoY", project_hybrid_desc: "Mensajería estilo WhatsApp con feeds estilo Instagram.", project_hybrid_eta: "Beta: Q4 2026", btn_join_waitlist: "Unirse a la Lista", status_active: "Activo", project_game_title: "Plataforma DeLoYGame", project_game_desc: "Portal de juegos interactivos.", btn_explore_game: "Iniciar Hub", game_title: "DeLoY Cyber Defense", game_desc: "¡Pilota la nave y destruye errores!", game_score: "PUNTOS", game_highscore: "RÉCORD", game_restart: "Reiniciar", game_start_btn: "INICIAR JUEGO", founder_subtitle: "LIDERAZGO", founder_head: "Rafiq Qadirov (deloy)", founder_title: "FUNDADOR", founder_bio: "Fundador de DeLoYGroup.", btn_contact_founder: "Contactar", footer_copy: "© 2026 DeLoYGroup. Fundado por Rafiq Qadirov.", modal_subtitle: "Directo a Rafiq Qadirov.", form_name: "NOMBRE", form_email: "EMAIL", form_message: "MENSAJE", btn_send: "Enviar", form_sent_title: "Enviado", form_sent_desc: "¡Gracias!" },
-      TR: { nav_about: "Hakkımızda", nav_projects: "Projeler", nav_arch: "Ekosistem", nav_telemetry: "Ağ", nav_game: "Oyun", nav_founder: "Liderlik", nav_contact: "İletişim", hero_badge: "YENİ NESİL DİJİTAL EKOSİSTEMLER", hero_title1: "GELECEĞİN", hero_title2: "SOSYAL VE OYUN DÜNYASI", hero_sub: "DeLoYGroup, Rafiq Qadirov (deloy) tarafından kurulan teknoloji şirketidir.", btn_app_preview: "Uygulama Önizleme", projects_subtitle: "Portföy", projects_title: "Öne Çıkan Ürünler", projects_desc: "Yüksek performanslı dijital sistemler.", status_in_dev: "Aktif Geliştirmede", project_hybrid_title: "DeLoY Birleşik Sosyal Ağ", project_hybrid_desc: "WhatsApp mesajlaşma + Instagram akışı.", project_hybrid_eta: "Beta: Ç4 2026", btn_join_waitlist: "Listeye Katıl", status_active: "Yayında", project_game_title: "DeLoYGame Platformu", project_game_desc: "Etkileşimli oyun portalı.", btn_explore_game: "Oyun Hub'ı", game_title: "DeLoY Siber Savunma", game_desc: "Sistem hatalarını yok edin!", game_score: "SKOR", game_highscore: "REKOR", game_restart: "Yeniden Başlat", game_start_btn: "BAŞLAT", founder_subtitle: "LİDERLİK", founder_head: "Rafiq Qadirov (deloy)", founder_title: "KURUCU", founder_bio: "DeLoYGroup'un kurucusu.", btn_contact_founder: "İletişime Geç", footer_copy: "© 2026 DeLoYGroup. Kurucu: Rafiq Qadirov.", modal_subtitle: "Rafiq Qadirov'a iletilir.", form_name: "ADINIZ", form_email: "E-POSTA", form_message: "MESAJINIZ", btn_send: "Gönder", form_sent_title: "Gönderildi", form_sent_desc: "Teşekkürler!" },
-      DE: { nav_about: "Über uns", nav_projects: "Projekte", nav_arch: "Ökosystem", nav_telemetry: "Netzwerk", nav_game: "Spiel", nav_founder: "Führung", nav_contact: "Kontakt", hero_badge: "DIGITALE ÖKOSYSTEME", hero_title1: "ENTWICKLUNG DER", hero_title2: "ZUKUNFT VON SOCIAL & GAMING", hero_sub: "Unabhängiges Technologieunternehmen von Rafiq Qadirov (deloy).", btn_app_preview: "App Vorschau", projects_subtitle: "Portfolio", projects_title: "Flaggschiff-Produkte", projects_desc: "Digitale Lösungen für Unterhaltung.", status_in_dev: "In Entwicklung", project_hybrid_title: "DeLoY Social & Messaging Hybrid", project_hybrid_desc: "WhatsApp Chat + Instagram Feed.", project_hybrid_eta: "Beta: Q4 2026", btn_join_waitlist: "Warteliste", status_active: "Live", project_game_title: "DeLoYGame Plattform", project_game_desc: "Gaming-Portal.", btn_explore_game: "Hub starten", game_title: "DeLoY Cyber Defense", game_desc: "Zerschieße Systemfehler!", game_score: "SCORE", game_highscore: "REKORD", game_restart: "Neustart", game_start_btn: "STARTEN", founder_subtitle: "FÜHRUNG", founder_head: "Rafiq Qadirov (deloy)", founder_title: "GRÜNDER", founder_bio: "Gründer von DeLoYGroup.", btn_contact_founder: "Kontaktieren", footer_copy: "© 2026 DeLoYGroup. Gründer: Rafiq Qadirov.", modal_subtitle: "Anfrage an Rafiq Qadirov.", form_name: "NAME", form_email: "E-MAIL", form_message: "NACHRICHT", btn_send: "Senden", form_sent_title: "Gesendet", form_sent_desc: "Vielen Dank!" },
-      FR: { nav_about: "À propos", nav_projects: "Projets", nav_arch: "Écosystème", nav_telemetry: "Réseau Live", nav_game: "Jeu Cyber", nav_founder: "Direction", nav_contact: "Contact", hero_badge: "ÉCOSYSTÈMES NUMÉRIQUES", hero_title1: "CONCEVOIR L'AVENIR", hero_title2: "DU JEU ET DES RÉSEAUX SOCIAUX", hero_sub: "DeLoYGroup est fondé par Rafiq Qadirov (deloy).", btn_app_preview: "Aperçu de l'App", projects_subtitle: "Portfolio", projects_title: "Produits Phares", projects_desc: "Expériences numériques pour le jeu.", status_in_dev: "En Développement", project_hybrid_title: "Réseau Social Unifié DeLoY", project_hybrid_desc: "Messagerie instantanée + Flux média.", project_hybrid_eta: "Bêta: Q4 2026", btn_join_waitlist: "Rejoindre", status_active: "En Ligne", project_game_title: "Plateforme DeLoYGame", project_game_desc: "Portail de jeux interactifs.", btn_explore_game: "Ouvrir le Hub", game_title: "DeLoY Cyber Defense", game_desc: "Détruisez les bugs système!", game_score: "SCORE", game_highscore: "MEILLEUR", game_restart: "Recommencer", game_start_btn: "JOUER", founder_subtitle: "DIRECTION", founder_head: "Rafiq Qadirov (deloy)", founder_title: "FONDATEUR", founder_bio: "Fondateur de DeLoYGroup.", btn_contact_founder: "Contacter", footer_copy: "© 2026 DeLoYGroup. Fondé par Rafiq Qadirov.", modal_subtitle: "Direct à Rafiq Qadirov.", form_name: "NOM", form_email: "EMAIL", form_message: "MESSAGE", btn_send: "Envoyer", form_sent_title: "Envoyé", form_sent_desc: "Merci!" },
-      IT: { nav_about: "Chi Siamo", nav_projects: "Progetti", nav_arch: "Ecosistema", nav_telemetry: "Rete Live", nav_game: "Gioco", nav_founder: "Leadership", nav_contact: "Contatti", hero_badge: "ECOSISTEMI DIGITALI", hero_title1: "PROGETTIAMO IL", hero_title2: "FUTURO DEL GAMING E SOCIAL", hero_sub: "Fondato da Rafiq Qadirov (deloy).", btn_app_preview: "Anteprima App", projects_subtitle: "Portfolio", projects_title: "Prodotti Principali", projects_desc: "Soluzioni digitali avanzate.", status_in_dev: "In Sviluppo", project_hybrid_title: "App Sociale Unificata DeLoY", project_hybrid_desc: "Messaggistica WhatsApp + Feed Instagram.", project_hybrid_eta: "Beta: Q4 2026", btn_join_waitlist: "Lista d'attesa", status_active: "Attivo", project_game_title: "Piattaforma DeLoYGame", project_game_desc: "Portale di gioco.", btn_explore_game: "Avvia Hub", game_title: "DeLoY Cyber Defense", game_desc: "Distruggi i bug di sistema!", game_score: "PUNTI", game_highscore: "RECORD", game_restart: "Riavvia", game_start_btn: "INIZIA", founder_subtitle: "LEADERSHIP", founder_head: "Rafiq Qadirov (deloy)", founder_title: "FONDATORE", founder_bio: "Fondatore di DeLoYGroup.", btn_contact_founder: "Contatta", footer_copy: "© 2026 DeLoYGroup. Fondato da Rafiq Qadirov.", modal_subtitle: "Diretto a Rafiq Qadirov.", form_name: "NOME", form_email: "EMAIL", form_message: "MESSAGGIO", btn_send: "Invia", form_sent_title: "Inviato", form_sent_desc: "Grazie!" },
-      ZH: { nav_about: "关于我们", nav_projects: "项目", nav_arch: "架构生态", nav_telemetry: "实时网络", nav_game: "小游戏", nav_founder: "创始人", nav_contact: "联系我们", hero_badge: "构建下一代数字生态系统", hero_title1: "重塑", hero_title2: "社交与游戏娱乐的未来", hero_sub: "由 Rafiq Qadirov (deloy) 创立的高科技企业。", btn_app_preview: "预览社交 App", projects_subtitle: "产品组合", projects_title: "核心生态产品", projects_desc: "打造高吞吐量数字体验。", status_in_dev: "积极研发中", project_hybrid_title: "DeLoY 融合即时通讯与社交网络", project_hybrid_desc: "WhatsApp 聊天 + Instagram 动态。", project_hybrid_eta: "Beta 测试: 2026年Q4", btn_join_waitlist: "加入等候名单", status_active: "已上线", project_game_title: "DeLoYGame 游戏平台", project_game_desc: "互动游戏门户 (deloygame.xyz)。", btn_explore_game: "进入游戏中心", game_title: "DeLoY 赛博防御街机", game_desc: "击落入侵系统的 Bug！", game_score: "得分", game_highscore: "最高分", game_restart: "重新开始", game_start_btn: "开始游戏", founder_subtitle: "领导力", founder_head: "Rafiq Qadirov (deloy)", founder_title: "创始人兼首席架构师", founder_bio: "DeLoYGroup 及 deloygame.xyz 创始人。", btn_contact_founder: "联系创始人", footer_copy: "© 2026 DeLoYGroup. 创始人: Rafiq Qadirov.", modal_subtitle: "直接发送至 Rafiq Qadirov。", form_name: "姓名", form_email: "邮箱", form_message: "留言", btn_send: "发送", form_sent_title: "发送成功", form_sent_desc: "感谢您的留言。" },
-      JA: { nav_about: "概要", nav_projects: "プロジェクト", nav_arch: "エコシステム", nav_telemetry: "ライブ通信", nav_game: "ミニゲーム", nav_founder: "創業者", nav_contact: "お問い合わせ", hero_badge: "次世代デジタルエコシステム", hero_title1: "ソーシャルとゲームの", hero_title2: "未来を設計する", hero_sub: "Rafiq Qadirov (deloy) によって設立されたIT企業。", btn_app_preview: "ハイブリッドAppプレビュー", projects_subtitle: "ポートフォリオ", projects_title: "フラッグシップ製品", projects_desc: "エンターテインメント統合ソリューション。", status_in_dev: "開発中", project_hybrid_title: "DeLoY 統合メッセージ＆SNSアプリ", project_hybrid_desc: "WhatsAppチャット + Instagramフィード。", project_hybrid_eta: "ベータ予定: 2026年Q4", btn_join_waitlist: "リスト登録", status_active: "運用中", project_game_title: "DeLoYGame プラットフォーム", project_game_desc: "ゲームポータル (deloygame.xyz)。", btn_explore_game: "ハブを開く", game_title: "DeLoY サイバーディフェンス Arcade", game_desc: "バグを撃ち落とせ！", game_score: "スコア", game_highscore: "ハイスコア", game_restart: "リトライ", game_start_btn: "スタート", founder_subtitle: "リーダーシップ", founder_head: "Rafiq Qadirov (deloy)", founder_title: "創業者", founder_bio: "DeLoYGroup 創業者。", btn_contact_founder: "創業者に連絡", footer_copy: "© 2026 DeLoYGroup. 創業者: Rafiq Qadirov.", modal_subtitle: "Rafiq Qadirovへ直通。", form_name: "お名前", form_email: "メール", form_message: "メッセージ", btn_send: "送信", form_sent_title: "送信完了", form_sent_desc: "ありがとうございます。" },
-      AR: { nav_about: "عن الشركة", nav_projects: "المشاريع", nav_arch: "المنظومة", nav_telemetry: "الشبكة الحية", nav_game: "لعبة إلكترونية", nav_founder: "القيادة", nav_contact: "اتصل بنا", hero_badge: "بناء الأنظمة الرقمية للجيل القادم", hero_title1: "صياغة مستقبل", hero_title2: "التواصل الاجتماعي والألعاب", hero_sub: "مجموعة تكنولوجية أسسها رفيق قديروف (deloy).", btn_app_preview: "معاينة التطبيق الهجين", projects_subtitle: "المشاريع", projects_title: "المنتجات الرئيسية", projects_desc: "تطوير تجارب رقمية للألعاب.", status_in_dev: "قيد التطوير النشط", project_hybrid_title: "تطبيق DeLoY الموحد للمراسلة والتواصل", project_hybrid_desc: "دردشة WhatsApp + منشورات Instagram.", project_hybrid_eta: "الإطلاق التجريبي: Q4 2026", btn_join_waitlist: "الانضمام للقائمة", status_active: "يعمل حالياً", project_game_title: "منصة DeLoYGame", project_game_desc: "بوابة ألعاب تفاعلية (deloygame.xyz).", btn_explore_game: "تشغيل المركز", game_title: "لعبة DeLoY للدفـاع الإلكتروني", game_desc: "دمر أخطاء النظام القادمة!", game_score: "النقاط", game_highscore: "أعلى نتيجة", game_restart: "إعادة التشغيل", game_start_btn: "ابدأ اللعبة", founder_subtitle: "القيادة", founder_head: "رفيق قديروف (deloy)", founder_title: "المؤسس", founder_bio: "يقود رفيق قديروف تصميم وتطوير DeLoYGroup.", btn_contact_founder: "التواصل مع المؤسس", footer_copy: "© 2026 DeLoYGroup. المؤسس: رفيق قديروف.", modal_subtitle: "رسالة مباشرة إلى رفيق قديروف.", form_name: "الاسم", form_email: "البريد الإلكتروني", form_message: "الرسالة", btn_send: "إرسال", form_sent_title: "تم الإرسال", form_sent_desc: "شكراً لك!" },
-      HI: { nav_about: "हमारे बारे में", nav_projects: "प्रोजेक्ट्स", nav_arch: "इकोसिस्टम", nav_telemetry: "लाइव नेटवर्क", nav_game: "साइबर गेम", nav_founder: "नेतृत्व", nav_contact: "संपर्क करें", hero_badge: "डिजिटल इकोसिस्टम का निर्माण", hero_title1: "गेमिंग और सोशल के", hero_title2: "भविष्य का निर्माण", hero_sub: "रफीक कादिरोव (deloy) द्वारा स्थापित स्वतंत्र तकनीक कंपनी।", btn_app_preview: "ऐप का पूर्वावलोकन", projects_subtitle: "पोर्टफोलियो", projects_title: "प्रमुख उत्पाद", projects_desc: "उच्च प्रदर्शन उत्पाद।", status_in_dev: "विकास में", project_hybrid_title: "DeLoY यूनिफाइड मैसेजिंग और सोशल नेटवर्क", project_hybrid_desc: "WhatsApp मैसेजिंग + Instagram स्टोरीज़।", project_hybrid_eta: "बीटा लॉन्च: Q4 2026", btn_join_waitlist: "वेटलिस्ट", status_active: "सक्रिय", project_game_title: "DeLoYGame प्लेटफॉर्म", project_game_desc: "गेमिंग पोर्टल (deloygame.xyz)।", btn_explore_game: "गेम हब खोलें", game_title: "DeLoY साइबर डिफेंस आर्केड", game_desc: "सिस्टम बग को नष्ट करें!", game_score: "स्कोर", game_highscore: "बेस्ट स्कोर", game_restart: "पुनः प्रारंभ", game_start_btn: "गेम शुरू करें", founder_subtitle: "नेतृत्व", founder_head: "रफीक कादिरोव (deloy)", founder_title: "संस्थापक", founder_bio: "DeLoYGroup के संस्थापक।", btn_contact_founder: "संस्थापक से संपर्क करें", footer_copy: "© 2026 DeLoYGroup. संस्थापक: रफीक कादिरोव।", modal_subtitle: "रफीक कादिरोव को सीधा संदेश।", form_name: "नाम", form_email: "ईमेल", form_message: "संदेश", btn_send: "भेजें", form_sent_title: "सफलतापूर्वक भेजा गया", form_sent_desc: "धन्यवाद!" },
-      KO: { nav_about: "소개", nav_projects: "프로젝트", nav_arch: "생태계", nav_telemetry: "라이브 네트워크", nav_game: "사이버 게임", nav_founder: "리더십", nav_contact: "문의하기", hero_badge: "차세대 디지털 생태계 구축", hero_title1: "소셜과 게이밍의", hero_title2: "미래를 설계하다", hero_sub: "Rafiq Qadirov (deloy)가 설립한 기술 기업.", btn_app_preview: "하이브리드 앱 미리보기", projects_subtitle: "포트폴리오", projects_title: "주요 플랫폼", projects_desc: "차세대 소셜 소통 솔루션.", status_in_dev: "개발 진행 중", project_hybrid_title: "DeLoY 통합 메신저 & 소셜 네트워크", project_hybrid_desc: "WhatsApp 메신저 + Instagram 피드.", project_hybrid_eta: "베타: 2026년 Q4", btn_join_waitlist: "대기 등록", status_active: "라이브", project_game_title: "DeLoYGame 플랫폼", project_game_desc: "게임 포털 (deloygame.xyz).", btn_explore_game: "게임 허브", game_title: "DeLoY 사이버 디펜스 아케이드", game_desc: "버그를 격추하세요!", game_score: "점수", game_highscore: "최고 점수", game_restart: "재시작", game_start_btn: "시작", founder_subtitle: "리더십", founder_head: "Rafiq Qadirov (deloy)", founder_title: "창립자", founder_bio: "DeLoYGroup 창립자.", btn_contact_founder: "창립자 문의", footer_copy: "© 2026 DeLoYGroup. 창립자: Rafiq Qadirov.", modal_subtitle: "Rafiq Qadirov에게 전달됩니다.", form_name: "이름", form_email: "이메일", form_message: "메시지", btn_send: "보내기", form_sent_title: "전송 완료", form_sent_desc: "감사합니다." },
-      PL: { nav_about: "O nas", nav_projects: "Projekty", nav_arch: "Ekosystem", nav_telemetry: "Sieć Live", nav_game: "Gra Cyber", nav_founder: "Liderzy", nav_contact: "Kontakt", hero_badge: "EKOSYSTEMY CYFROWE NOWEJ GENERACJI", hero_title1: "PROJEKTUJEMY", hero_title2: "PRZYSZŁOŚĆ SOCIAL I GAMINGU", hero_sub: "Firma technologiczna założona przez Rafiq Qadirov (deloy).", btn_app_preview: "Podgląd Aplikacji", projects_subtitle: "Portfolio", projects_title: "Główne Produkty", projects_desc: "Rozwiązania cyfrowe rozrywki.", status_in_dev: "W trakcie rozwoju", project_hybrid_title: "Aplikacja DeLoY Messenger + Social", project_hybrid_desc: "Czat WhatsApp + Relacje Instagram.", project_hybrid_eta: "Beta: Q4 2026", btn_join_waitlist: "Dołącz do listy", status_active: "Aktywny", project_game_title: "Platforma DeLoYGame", project_game_desc: "Portal gier (deloygame.xyz).", btn_explore_game: "Centrum Gier", game_title: "Arcade DeLoY Cyber Defense", game_desc: "Niszcz błędy systemowe!", game_score: "PUNKTY", game_highscore: "REKORD", game_restart: "Restart", game_start_btn: "START", founder_subtitle: "LIDERZY", founder_head: "Rafiq Qadirov (deloy)", founder_title: "ZAŁOŻYCIEL", founder_bio: "Założyciel DeLoYGroup.", btn_contact_founder: "Skontaktuj się", footer_copy: "© 2026 DeLoYGroup. Założyciel: Rafiq Qadirov.", modal_subtitle: "Wiadomość do Rafika Qadirova.", form_name: "IMIĘ", form_email: "EMAIL", form_message: "WIADOMOŚĆ", btn_send: "Wyślij", form_sent_title: "Wysłano", form_sent_desc: "Dziękujemy!" },
-      UK: { nav_about: "Про нас", nav_projects: "Проєкти", nav_arch: "Екосистема", nav_telemetry: "Мережа Live", nav_game: "Кібер-Гра", nav_founder: "Керівництво", nav_contact: "Контакти", hero_badge: "ЦИФРОВІ ЕКОСИСТЕМИ НОВОГО ПОКОЛІННЯ", hero_title1: "ПРОЄКТУЄМО", hero_title2: "МАЙБУТНЄ СОЦМЕРЕЖ ТА ГЕЙМІНГУ", hero_sub: "Компанія, заснована Рафіком Кадіровим (deloy).", btn_app_preview: "Перегляд Додатку", projects_subtitle: "Портфоліо", projects_title: "Основні Продукти", projects_desc: "Високопродуктивні рішення.", status_in_dev: "В активній розробці", project_hybrid_title: "Гібридний Месенджер + Соцмережа DeLoY", project_hybrid_desc: "Чат WhatsApp + Медіа-стрічка Instagram.", project_hybrid_eta: "Бета: Q4 2026", btn_join_waitlist: "Приєднатися", status_active: "Працює", project_game_title: "Ігрова Платформа DeLoYGame", project_game_desc: "Ігровий портал (deloygame.xyz).", btn_explore_game: "Запустити Хаб", game_title: "Аркада DeLoY Cyber Defense", game_desc: "Знищуйте системні збої!", game_score: "РАХУНОК", game_highscore: "РЕКОРД", game_restart: "Перезапуск", game_start_btn: "ПОЧАТИ ГРУ", founder_subtitle: "КЕРІВНИЦТВО", founder_head: "Рафік Кадіров (deloy)", founder_title: "ЗАСНОВНИК", founder_bio: "Засновник DeLoYGroup та deloygame.xyz.", btn_contact_founder: "Зв'язатися", footer_copy: "© 2026 DeLoYGroup. Засновник: Рафік Кадіров.", modal_subtitle: "Надсилається безпосередньо Рафіку Кадірову.", form_name: "ІМ'Я", form_email: "EMAIL", form_message: "ПОВІДОМЛЕННЯ", btn_send: "Надіслати", form_sent_title: "Успішно Надіслано", form_sent_desc: "Дякуємо!" }
-    };
-
-    const supportedLanguages = [
-      { code: "EN", name: "English", flag: "🇺🇸" },
-      { code: "RU", name: "Русский", flag: "🇷🇺" },
-      { code: "AZ", name: "Azərbaycan", flag: "🇦🇿" },
-      { code: "PT", name: "Português", flag: "🇵🇹" },
-      { code: "ES", name: "Español", flag: "🇪🇸" },
-      { code: "TR", name: "Türkçe", flag: "🇹🇷" },
-      { code: "DE", name: "Deutsch", flag: "🇩🇪" },
-      { code: "FR", name: "Français", flag: "🇫🇷" },
-      { code: "IT", name: "Italiano", flag: "🇮🇹" },
-      { code: "ZH", name: "中文", flag: "🇨🇳" },
-      { code: "JA", name: "日本語", flag: "🇯🇵" },
-      { code: "AR", name: "العربية", flag: "🇸🇦", rtl: true },
-      { code: "HI", name: "हिन्दी", flag: "🇮🇳" },
-      { code: "KO", name: "한국어", flag: "🇰🇷" },
-      { code: "PL", name: "Polski", flag: "🇵🇱" },
-      { code: "UK", name: "Українська", flag: "🇺🇦" }
-    ];
-
-    let currentLang = "EN";
-    let threeParticlesMaterial;
-
-    // Initialize UI on Load
-    window.addEventListener("DOMContentLoaded", () => {
-      lucide.createIcons();
-      populateLangMenu();
-      initThreeJSBackground();
-      init3DTilt();
-      initGameControls();
-      startTelemetryTicker();
-    });
-
-    // Firebase Callback on Auth Ready
-    window.onFirebaseReady = function() {
-      subscribeGlobalLeaderboard();
-    };
-
-    // Firebase Realtime Highscore Save
-    async function saveFirebaseScore(newScore) {
-      if (!window.deloyFirebase) return;
-      const { db, appId, collection, addDoc } = window.deloyFirebase;
-      try {
-        const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
-        await addDoc(scoresRef, {
-          score: newScore,
-          player: "Pilot_" + (window.currentUserId ? window.currentUserId.substring(0, 5) : "Guest"),
-          timestamp: new Date().toISOString()
-        });
-        showToast("Score saved to Firebase Cloud!");
-      } catch (err) {
-        console.error("Error saving score to Firebase:", err);
-      }
-    }
-
-    // Subscribe to Firebase Leaderboard Updates
-    function subscribeGlobalLeaderboard() {
-      if (!window.deloyFirebase) return;
-      const { db, appId, collection, onSnapshot } = window.deloyFirebase;
-      try {
-        const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
-        onSnapshot(scoresRef, (snapshot) => {
-          let scoreList = [];
-          snapshot.forEach(doc => {
-            scoreList.push(doc.data());
-          });
-          scoreList.sort((a, b) => b.score - a.score);
-          scoreList = scoreList.slice(0, 3);
-
-          const leaderboardContainer = document.getElementById("firebaseLeaderboardList");
-          if (leaderboardContainer && scoreList.length > 0) {
-            leaderboardContainer.innerHTML = scoreList.map((item, idx) => `
-              <div class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
-                <span class="text-neutral-400 truncate">${idx + 1}. ${item.player || 'Agent'}</span>
-                <span class="font-bold text-amber-500">${item.score} pts</span>
-              </div>
-            `).join('');
-          }
-        }, (error) => {
-          console.warn("Leaderboard snapshot error:", error);
-        });
-      } catch (e) {
-        console.warn("Firebase listener init failed", e);
-      }
-    }
-
-    // Firebase Contact Form Save
-    async function handleFormSubmit(e) {
-      e.preventDefault();
-      const name = document.getElementById("inputName")?.value;
-      const email = document.getElementById("inputEmail")?.value;
-      const msg = document.getElementById("inputMsg")?.value;
-
-      if (window.deloyFirebase) {
-        const { db, appId, collection, addDoc } = window.deloyFirebase;
-        try {
-          const ticketsRef = collection(db, 'artifacts', appId, 'public', 'data', 'tickets');
-          await addDoc(ticketsRef, {
-            name: name,
-            email: email,
-            message: msg,
-            timestamp: new Date().toISOString(),
-            status: "open"
-          });
-        } catch (err) {
-          console.error("Error saving ticket to Firebase:", err);
-        }
-      }
-
-      document.getElementById("contactForm").classList.add("hidden");
-      document.getElementById("modalSuccess").classList.remove("hidden");
-    }
-
-    // Interactive Social App Phone Preview Controls
-    function openSocialMockupModal() {
-      document.getElementById("socialMockupModal").classList.remove("hidden");
-    }
-    function closeSocialMockupModal() {
-      document.getElementById("socialMockupModal").classList.add("hidden");
-    }
-    function switchPhoneTab(tab) {
-      const msgView = document.getElementById("phoneViewMessages");
-      const feedView = document.getElementById("phoneViewFeed");
-      const tabBtnMsg = document.getElementById("tabBtnMsg");
-      const tabBtnFeed = document.getElementById("tabBtnFeed");
-
-      if (tab === 'messages') {
-        msgView.classList.remove("hidden");
-        feedView.classList.add("hidden");
-        tabBtnMsg.className = "py-3 text-sky-400 border-b-2 border-sky-400 flex items-center justify-center gap-1.5";
-        tabBtnFeed.className = "py-3 text-neutral-400 border-b-2 border-transparent flex items-center justify-center gap-1.5";
-      } else {
-        msgView.classList.add("hidden");
-        feedView.classList.remove("hidden");
-        tabBtnMsg.className = "py-3 text-neutral-400 border-b-2 border-transparent flex items-center justify-center gap-1.5";
-        tabBtnFeed.className = "py-3 text-purple-400 border-b-2 border-purple-400 flex items-center justify-center gap-1.5";
-      }
-    }
-
-    // Interactive Architecture Node Selector
-    function selectArchNode(nodeType) {
-      const title = document.getElementById("archDetailTitle");
-      const desc = document.getElementById("archDetailDesc");
-
-      if (nodeType === 'social') {
-        title.innerText = "Selected Node: DeLoY Social Engine";
-        desc.innerText = "[PROTOCOL]: Hybrid E2EE protocol supporting real-time WebSocket messaging and CDN-backed media story pipelines for WhatsApp + Instagram integration.";
-      } else if (nodeType === 'game') {
-        title.innerText = "Selected Node: DeLoYGame Portal";
-        desc.innerText = "[PROTOCOL]: Low-latency WebSockets & WebRTC multiplayer channel connected directly to deloygame.xyz leaderboard database.";
-      } else {
-        title.innerText = "Selected Node: DeLoY Cloud & Auth Core";
-        desc.innerText = "[CORE PROTOCOL]: Coordinates real-time WebSockets between DeLoY Social and DeLoYGame portal using AES-256 GCM encryption and automated fallback relay nodes.";
-      }
-    }
-
-    // Copy to Clipboard Toast
-    function copyToClipboard(text, label) {
-      const dummy = document.createElement("input");
-      document.body.appendChild(dummy);
-      dummy.value = text;
-      dummy.select();
-      document.execCommand("copy");
-      document.body.removeChild(dummy);
-
-      showToast(`Copied ${label} to clipboard!`);
-    }
-
-    function showToast(message) {
-      const container = document.getElementById("toastContainer");
-      const toast = document.createElement("div");
-      toast.className = "toast-slide px-4 py-3 rounded-xl bg-neutral-900 text-white font-mono text-xs border border-neutral-700 shadow-2xl flex items-center gap-2 pointer-events-auto";
-      toast.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> ${message}`;
-      container.appendChild(toast);
-      lucide.createIcons();
-
-      setTimeout(() => {
-        toast.remove();
-      }, 3000);
-    }
-
-    // CLI Drawer Toggle and Command Handler
-    function toggleConsole() {
-      const drawer = document.getElementById("consoleDrawer");
-      drawer.classList.toggle("hidden");
-    }
-
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "`" || e.key === "~") {
-        e.preventDefault();
-        toggleConsole();
-      }
-    });
-
-    function handleCliSubmit(e) {
-      e.preventDefault();
-      const input = document.getElementById("cliInput");
-      const val = input.value.trim().toLowerCase();
-      const output = document.getElementById("terminalOutput");
-      if (!val) return;
-
-      const userLine = document.createElement("div");
-      userLine.className = "text-emerald-400 font-bold";
-      userLine.innerText = `> ${val}`;
-      output.appendChild(userLine);
-
-      const resp = document.createElement("div");
-      resp.className = "text-neutral-300";
-
-      switch(val) {
-        case "help":
-          resp.innerText = "Available commands: help, founder, projects, game, status, contact, clear, theme";
-          break;
-        case "founder":
-          resp.innerText = "Rafiq Qadirov (@deloy) - Founder & Chief Architect of DeLoYGroup.";
-          break;
-        case "projects":
-          resp.innerText = "1. DeLoYGame Portal (deloygame.xyz)\n2. DeLoY Social App (WhatsApp + Instagram Hybrid)";
-          break;
-        case "status":
-          resp.innerText = "Mesh Health: 100% OPERATIONAL | Active Sessions: 14,280 | Relay Ping: 18ms";
-          break;
-        case "game":
-          resp.innerText = "Launching Cyber Defense Arcade...";
-          window.location.hash = "minigame";
-          break;
-        case "contact":
-          resp.innerText = "WhatsApp: +7 927 093-88-18 | Email: support@deloygame.xyz | Site: deloygame.xyz";
-          break;
-        case "theme":
-          toggleTheme();
-          resp.innerText = "Theme toggled.";
-          break;
-        case "clear":
-          output.innerHTML = "";
-          input.value = "";
-          return;
-        default:
-          resp.innerText = `Command not recognized: '${val}'. Type 'help' for options.`;
-      }
-
-      output.appendChild(resp);
-      output.scrollTop = output.scrollHeight;
-      input.value = "";
-    }
-
-    // Telemetry Stat Ticker Simulation
-    function startTelemetryTicker() {
-      setInterval(() => {
-        const activeElem = document.getElementById("statActiveSessions");
-        const tpElem = document.getElementById("statThroughput");
-        if (activeElem) {
-          const current = 14200 + Math.floor(Math.random() * 180);
-          activeElem.innerText = current.toLocaleString();
-        }
-        if (tpElem) {
-          const val = (2.7 + Math.random() * 0.3).toFixed(2);
-          tpElem.innerText = `${val} GB/s`;
-        }
-      }, 2500);
-    }
-
-    function init3DTilt() {
-      const cards = document.querySelectorAll(".tilt-card");
-      cards.forEach(card => {
-        card.addEventListener("mousemove", (e) => {
-          const rect = card.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          const centerX = rect.width / 2;
-          const centerY = rect.height / 2;
-          const rotateX = ((y - centerY) / centerY) * -5;
-          const rotateY = ((x - centerX) / centerX) * 5;
-
-          card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
-        });
-
-        card.addEventListener("mouseleave", () => {
-          card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)";
-        });
-      });
-    }
-
-    // Three.js Interactive Particle Backdrop
-    function initThreeJSBackground() {
-      const container = document.getElementById("canvas-container");
-      const scene = new THREE.Scene();
-
-      const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    // --- 1. THREE.JS 3D PARTICLE MESH BACKGROUND ---
+    let scene, camera, renderer, particles;
+    function init3D() {
+      const container = document.getElementById('bg-3d');
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       camera.position.z = 30;
 
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       container.appendChild(renderer.domElement);
 
-      const particleCount = 250;
       const geometry = new THREE.BufferGeometry();
-      const positions = new Float32Array(particleCount * 3);
+      const count = 700;
+      const posArray = new Float32Array(count * 3);
 
-      for (let i = 0; i < particleCount * 3; i += 3) {
-        positions[i] = (Math.random() - 0.5) * 80;
-        positions[i + 1] = (Math.random() - 0.5) * 80;
-        positions[i + 2] = (Math.random() - 0.5) * 80;
+      for (let i = 0; i < count * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 80;
       }
 
-      geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-
-      threeParticlesMaterial = new THREE.PointsMaterial({
-        size: 0.85,
-        color: document.documentElement.classList.contains("dark") ? 0x94a3b8 : 0x334155,
+      geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+      const material = new THREE.PointsMaterial({
+        size: 0.25,
+        color: 0x00f0ff,
         transparent: true,
-        opacity: 0.6
+        opacity: 0.5
       });
 
-      const particleSystem = new THREE.Points(geometry, threeParticlesMaterial);
-      scene.add(particleSystem);
-
-      const icoGeometry = new THREE.IcosahedronGeometry(12, 1);
-      const icoMaterial = new THREE.MeshBasicMaterial({
-        color: 0x10b981,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.15
-      });
-      const icoMesh = new THREE.Mesh(icoGeometry, icoMaterial);
-      icoMesh.position.set(0, 0, -10);
-      scene.add(icoMesh);
-
-      let mouseX = 0;
-      let mouseY = 0;
-
-      document.addEventListener("mousemove", (e) => {
-        mouseX = (e.clientX - window.innerWidth / 2) * 0.0004;
-        mouseY = (e.clientY - window.innerHeight / 2) * 0.0004;
-      });
+      particles = new THREE.Points(geometry, material);
+      scene.add(particles);
 
       function animate() {
         requestAnimationFrame(animate);
-        particleSystem.rotation.y += 0.0007;
-        particleSystem.rotation.x += 0.0003;
-        icoMesh.rotation.x += 0.0015;
-        icoMesh.rotation.y += 0.0025;
-
-        camera.position.x += (mouseX * 10 - camera.position.x) * 0.05;
-        camera.position.y += (-mouseY * 10 - camera.position.y) * 0.05;
-        camera.lookAt(scene.position);
-
+        particles.rotation.y += 0.001;
+        particles.rotation.x += 0.0005;
         renderer.render(scene, camera);
       }
-
       animate();
+    }
+    window.addEventListener('load', init3D);
 
-      window.addEventListener("resize", () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
+    // --- 2. ACCENT COLOR CUSTOMIZER ---
+    function setAccent(color, glow) {
+      document.documentElement.style.setProperty('--color-accent', color);
+      document.documentElement.style.setProperty('--color-accent-glow', glow);
     }
 
-    /* -------------------------------------------------------------
-       DeLoY Cyber Defense - Enhanced Arcade Mini-Game Logic
-    ------------------------------------------------------------- */
-    let canvas, ctx;
-    let gameActive = false;
-    let score = 0;
-    let highScore = localStorage.getItem("deloy_highscore") || 0;
-    let soundEnabled = true;
-
-    let player = { x: 0, y: 0, width: 36, height: 24, speed: 6.5, dx: 0, powerUp: "normal", powerTimer: 0 };
-    let bullets = [];
-    let enemies = [];
-    let powerups = [];
-    let particles = [];
-    let enemySpawnTimer = 0;
-    let keyState = {};
-
-    function initGameControls() {
-      canvas = document.getElementById("gameCanvas");
-      ctx = canvas.getContext("2d");
-      
-      resizeCanvas();
-      window.addEventListener("resize", resizeCanvas);
-
-      document.getElementById("highScoreDisplay").innerText = highScore;
-
-      window.addEventListener("keydown", (e) => {
-        keyState[e.key] = true;
-        if (e.key === " " && gameActive) {
-          e.preventDefault();
-          shootBullet();
-        }
-      });
-
-      window.addEventListener("keyup", (e) => {
-        keyState[e.key] = false;
-      });
-
-      // On-Screen Mobile Arcade Buttons
-      const btnLeft = document.getElementById("btnLeft");
-      const btnRight = document.getElementById("btnRight");
-      const btnShoot = document.getElementById("btnShoot");
-
-      btnLeft.addEventListener("touchstart", (e) => { e.preventDefault(); keyState["ArrowLeft"] = true; });
-      btnLeft.addEventListener("touchend", (e) => { e.preventDefault(); keyState["ArrowLeft"] = false; });
-      btnLeft.addEventListener("mousedown", () => { keyState["ArrowLeft"] = true; });
-      btnLeft.addEventListener("mouseup", () => { keyState["ArrowLeft"] = false; });
-
-      btnRight.addEventListener("touchstart", (e) => { e.preventDefault(); keyState["ArrowRight"] = true; });
-      btnRight.addEventListener("touchend", (e) => { e.preventDefault(); keyState["ArrowRight"] = false; });
-      btnRight.addEventListener("mousedown", () => { keyState["ArrowRight"] = true; });
-      btnRight.addEventListener("mouseup", () => { keyState["ArrowRight"] = false; });
-
-      btnShoot.addEventListener("touchstart", (e) => { e.preventDefault(); if (gameActive) shootBullet(); });
-      btnShoot.addEventListener("mousedown", () => { if (gameActive) shootBullet(); });
-    }
-
-    function resizeCanvas() {
-      if (!canvas) return;
-      const rect = canvas.parentElement.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height || 380;
-      player.y = canvas.height - 40;
-      if (player.x === 0) player.x = canvas.width / 2 - player.width / 2;
-    }
-
-    function toggleGameSound() {
-      soundEnabled = !soundEnabled;
-      const icon = document.getElementById("soundIcon");
-      if (soundEnabled) {
-        icon.setAttribute("data-lucide", "volume-2");
+    // --- 3. THEME TOGGLE ---
+    function toggleTheme() {
+      const html = document.documentElement;
+      const icon = document.getElementById('theme-icon');
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        icon.className = 'fa-solid fa-sun';
       } else {
-        icon.setAttribute("data-lucide", "volume-x");
+        html.classList.add('dark');
+        icon.className = 'fa-solid fa-moon';
       }
-      lucide.createIcons();
     }
 
-    // Web Audio Synthesizer Sound FX
-    function playSoundFX(freq, duration, type = "sine") {
-      if (!soundEnabled) return;
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const audioCtx = new AudioCtx();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (err) {}
-    }
-
-    function startGame() {
-      score = 0;
-      bullets = [];
-      enemies = [];
-      powerups = [];
-      particles = [];
-      player.powerUp = "normal";
-      player.powerTimer = 0;
-      gameActive = true;
-      document.getElementById("scoreDisplay").innerText = "0";
-      document.getElementById("powerUpDisplay").innerText = "NORMAL";
-      document.getElementById("gameOverlay").classList.add("hidden");
-      player.x = canvas.width / 2 - player.width / 2;
-      requestAnimationFrame(gameLoop);
-    }
-
-    function resetGame() {
-      gameActive = false;
-      document.getElementById("overlayTitle").innerText = "DeLoY Cyber Defense";
-      document.getElementById("overlayBtnText").innerText = "START DEFENSE";
-      document.getElementById("gameOverlay").classList.remove("hidden");
-    }
-
-    function gameOver() {
-      gameActive = false;
-      playSoundFX(150, 0.4, "sawtooth");
-
-      if (score > highScore) {
-        highScore = score;
-        localStorage.setItem("deloy_highscore", highScore);
-        document.getElementById("highScoreDisplay").innerText = highScore;
-      }
-
-      // Save to Firebase on Game Over
-      if (score > 0) {
-        saveFirebaseScore(score);
-      }
-
-      document.getElementById("overlayTitle").innerText = "SYSTEM BREACHED!";
-      document.getElementById("overlaySub").innerText = `Final Score: ${score} Bugs Cleared`;
-      document.getElementById("overlayBtnText").innerText = "PLAY AGAIN";
-      document.getElementById("gameOverlay").classList.remove("hidden");
-    }
-
-    function shootBullet() {
-      if (player.powerUp === "multishot") {
-        bullets.push({ x: player.x + 4, y: player.y, width: 4, height: 12, speed: 9.5, dx: -1.5 });
-        bullets.push({ x: player.x + player.width / 2 - 2, y: player.y, width: 4, height: 12, speed: 9.5, dx: 0 });
-        bullets.push({ x: player.x + player.width - 8, y: player.y, width: 4, height: 12, speed: 9.5, dx: 1.5 });
+    // --- 4. MATRIX RAIN EASTER EGG ---
+    let matrixInterval;
+    function toggleMatrix() {
+      const canvas = document.getElementById('matrix-canvas');
+      if (canvas.style.display === 'block') {
+        canvas.style.display = 'none';
+        clearInterval(matrixInterval);
       } else {
-        bullets.push({ x: player.x + player.width / 2 - 2, y: player.y, width: 4, height: 12, speed: 9, dx: 0 });
+        canvas.style.display = 'block';
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const ctx = canvas.getContext('2d');
+        const chars = 'DELOYGROUP10010101001100';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        matrixInterval = setInterval(() => {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#0f0';
+          ctx.font = fontSize + 'px monospace';
+
+          for (let i = 0; i < drops.length; i++) {
+            const text = chars.charAt(Math.floor(Math.random() * chars.length));
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+          }
+        }, 33);
       }
-      playSoundFX(600, 0.1, "triangle");
     }
 
-    function createExplosion(x, y, color) {
-      for (let i = 0; i < 14; i++) {
-        particles.push({
-          x: x,
-          y: y,
-          dx: (Math.random() - 0.5) * 6,
-          dy: (Math.random() - 0.5) * 6,
-          radius: Math.random() * 3 + 1,
-          color: color,
-          life: 22
-        });
+    // Key shortcut Ctrl+Shift+D
+    window.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') toggleMatrix();
+    });
+
+    // --- 5. TERMINAL COMMAND ENGINE ---
+    function handleTerminalSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('terminal-input');
+      const logs = document.getElementById('terminal-logs');
+      const cmd = input.value.trim().toLowerCase();
+      input.value = '';
+
+      logs.innerHTML += `<div class="text-white">&gt; ${cmd}</div>`;
+
+      let reply = '';
+      switch(cmd) {
+        case 'help':
+          reply = 'Available: help, projects, game, ping, matrix, founder, clear';
+          break;
+        case 'projects':
+          reply = '1. DeLoYGame (deloygame.xyz)\n2. DeLoY Social (WhatsApp+Instagram Hybrid)';
+          break;
+        case 'founder':
+          reply = 'CEO & Founder: Rafiq Qadirov (@deloy)';
+          break;
+        case 'ping':
+          reply = 'Pong! Firebase Latency: ' + Math.floor(Math.random() * 15 + 10) + 'ms';
+          break;
+        case 'clear':
+          logs.innerHTML = '';
+          return;
+        default:
+          reply = `Unknown command '${cmd}'. Type 'help' for info.`;
       }
+      logs.innerHTML += `<div class="text-neutral-400">${reply}</div>`;
+      logs.scrollTop = logs.scrollHeight;
     }
 
-    function gameLoop() {
-      if (!gameActive) return;
+    // --- 6. CYBER DEFENSE MINI-GAME ENGINE ---
+    let gameLoop, gameScore = 0, gameHigh = 0;
+    function startCyberGame() {
+      const canvas = document.getElementById('cyber-game-canvas');
+      const ctx = canvas.getContext('2d');
+      gameScore = 0;
+      document.getElementById('game-score').innerText = gameScore;
 
-      // Clear Frame
-      ctx.fillStyle = "#090a0f";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      let player = { x: canvas.width / 2 - 15, y: canvas.height - 30, w: 30, h: 15 };
+      let bullets = [];
+      let enemies = [];
 
-      // Powerup Timer Update
-      if (player.powerTimer > 0) {
-        player.powerTimer--;
-        if (player.powerTimer <= 0) {
-          player.powerUp = "normal";
-          document.getElementById("powerUpDisplay").innerText = "NORMAL";
-        }
-      }
+      clearInterval(gameLoop);
 
-      // Player Controls Update
-      if (keyState["ArrowLeft"] || keyState["a"] || keyState["A"]) {
-        player.x -= player.speed;
-      }
-      if (keyState["ArrowRight"] || keyState["d"] || keyState["D"]) {
-        player.x += player.speed;
-      }
+      canvas.onmousemove = function(e) {
+        const rect = canvas.getBoundingClientRect();
+        player.x = e.clientX - rect.left - player.w / 2;
+      };
 
-      // Constrain Ship Boundary
-      if (player.x < 0) player.x = 0;
-      if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+      canvas.onclick = function() {
+        bullets.push({ x: player.x + player.w / 2 - 2, y: player.y, w: 4, h: 10 });
+        playSynthSound('laser');
+      };
 
-      // Draw DeLoY Player Ship
-      ctx.fillStyle = player.powerUp === "multishot" ? "#f59e0b" : "#10b981";
-      ctx.beginPath();
-      ctx.moveTo(player.x + player.width / 2, player.y);
-      ctx.lineTo(player.x + player.width, player.y + player.height);
-      ctx.lineTo(player.x, player.y + player.height);
-      ctx.closePath();
-      ctx.fill();
+      gameLoop = setInterval(() => {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Spawn Enemies (Bugs)
-      enemySpawnTimer++;
-      const spawnInterval = Math.max(20, 55 - Math.floor(score / 6));
-      if (enemySpawnTimer > spawnInterval) {
-        enemySpawnTimer = 0;
-        enemies.push({
-          x: Math.random() * (canvas.width - 24),
-          y: -24,
-          size: 22,
-          speed: 1.8 + Math.random() * 1.5 + (score * 0.05)
+        // Draw Player
+        ctx.fillStyle = '#00f0ff';
+        ctx.fillRect(player.x, player.y, player.w, player.h);
+
+        // Bullets
+        bullets.forEach((b, index) => {
+          b.y -= 7;
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(b.x, b.y, b.w, b.h);
+          if (b.y < 0) bullets.splice(index, 1);
         });
 
-        // Chance to spawn powerup
-        if (Math.random() < 0.15) {
-          powerups.push({
-            x: Math.random() * (canvas.width - 20),
-            y: -20,
-            size: 18,
-            speed: 2
+        // Spawn Enemies
+        if (Math.random() < 0.04) {
+          enemies.push({ x: Math.random() * (canvas.width - 20), y: 0, w: 20, h: 20 });
+        }
+
+        // Enemies
+        enemies.forEach((en, eIdx) => {
+          en.y += 2;
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(en.x, en.y, en.w, en.h);
+
+          // Collision with Bullets
+          bullets.forEach((b, bIdx) => {
+            if (b.x < en.x + en.w && b.x + b.w > en.x && b.y < en.y + en.h && b.y + b.h > en.y) {
+              enemies.splice(eIdx, 1);
+              bullets.splice(bIdx, 1);
+              gameScore += 10;
+              document.getElementById('game-score').innerText = gameScore;
+              if (gameScore > gameHigh) {
+                gameHigh = gameScore;
+                document.getElementById('game-high').innerText = gameHigh;
+              }
+              playSynthSound('explosion');
+            }
           });
-        }
+
+          // Game Over condition
+          if (en.y > canvas.height) {
+            clearInterval(gameLoop);
+            ctx.fillStyle = 'rgba(255,0,0,0.5)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px monospace';
+            ctx.fillText('SYSTEM BREACH! Score: ' + gameScore, 170, 200);
+
+            if (window.saveScoreToFirestore && gameScore > 0) {
+              window.saveScoreToFirestore(gameScore);
+            }
+          }
+        });
+
+      }, 1000 / 60);
+    }
+
+    // --- 7. WEB AUDIO SYNTHESIZER ---
+    function playSynthSound(type) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      if (type === 'click') {
+        osc.frequency.setValueAtTime(800, ctx.currentTime);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+        osc.start(); osc.stop(ctx.currentTime + 0.05);
+      } else if (type === 'laser') {
+        osc.frequency.setValueAtTime(1200, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        osc.start(); osc.stop(ctx.currentTime + 0.1);
+      } else if (type === 'explosion') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(30, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        osc.start(); osc.stop(ctx.currentTime + 0.2);
+      } else if (type === 'success') {
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        osc.start(); osc.stop(ctx.currentTime + 0.16);
       }
+    }
 
-      // Update & Draw Powerups
-      for (let i = powerups.length - 1; i >= 0; i--) {
-        let p = powerups[i];
-        p.y += p.speed;
-
-        ctx.fillStyle = "#f59e0b";
-        ctx.beginPath();
-        ctx.arc(p.x + p.size/2, p.y + p.size/2, p.size/2, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Collect Powerup
-        if (
-          p.x < player.x + player.width &&
-          p.x + p.size > player.x &&
-          p.y < player.y + player.height &&
-          p.y + p.size > player.y
-        ) {
-          player.powerUp = "multishot";
-          player.powerTimer = 350;
-          document.getElementById("powerUpDisplay").innerText = "MULTI-SHOT";
-          playSoundFX(800, 0.25, "sine");
-          powerups.splice(i, 1);
-        } else if (p.y > canvas.height + 20) {
-          powerups.splice(i, 1);
-        }
-      }
-
-      // Update & Draw Bullets
-      for (let i = bullets.length - 1; i >= 0; i--) {
-        let b = bullets[i];
-        b.y -= b.speed;
-        b.x += b.dx || 0;
-
-        ctx.fillStyle = player.powerUp === "multishot" ? "#f59e0b" : "#38bdf8";
-        ctx.fillRect(b.x, b.y, b.width, b.height);
-
-        if (b.y < -10) bullets.splice(i, 1);
-      }
-
-      // Update & Draw Enemies
-      for (let i = enemies.length - 1; i >= 0; i--) {
-        let e = enemies[i];
-        e.y += e.speed;
-
-        // Draw Bug Graphic
-        ctx.fillStyle = "#f43f5e";
-        ctx.fillRect(e.x, e.y, e.size, e.size);
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(e.x + 4, e.y + 4, 4, 4);
-        ctx.fillRect(e.x + e.size - 8, e.y + 4, 4, 4);
-
-        // Collision with Bullets
-        for (let j = bullets.length - 1; j >= 0; j--) {
-          let b = bullets[j];
-          if (
-            b.x < e.x + e.size &&
-            b.x + b.width > e.x &&
-            b.y < e.y + e.size &&
-            b.y + b.height > e.y
-          ) {
-            createExplosion(e.x + e.size / 2, e.y + e.size / 2, "#f43f5e");
-            playSoundFX(300, 0.15, "square");
-            enemies.splice(i, 1);
-            bullets.splice(j, 1);
-            score += 10;
-            document.getElementById("scoreDisplay").innerText = score;
-            break;
+    // --- 8. CHART.JS TELEMETRY GRAPH ---
+    window.addEventListener('load', () => {
+      const ctxChart = document.getElementById('telemetry-chart').getContext('2d');
+      const chart = new Chart(ctxChart, {
+        type: 'line',
+        data: {
+          labels: ['21:00', '21:10', '21:20', '21:30', '21:40'],
+          datasets: [{
+            label: 'Firebase Sync Ping (ms)',
+            data: [12, 19, 14, 15, 11],
+            borderColor: '#00f0ff',
+            backgroundColor: 'rgba(0,240,255,0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' } }
           }
         }
+      });
+    });
 
-        // Check Game Over (Enemy reaches bottom)
-        if (e && e.y + e.size >= player.y) {
-          gameOver();
-          return;
-        }
+    // --- 9. MULTI-LANGUAGE DICTIONARY (12 LOCALES) ---
+    const translations = {
+      ru: {
+        nav_about: "О нас", nav_projects: "Проекты", nav_ide: "VS Code Терминал", nav_game: "Мини-игра", nav_telemetry: "Телеметрия", nav_contact: "Контакты",
+        hero_badge: "ОСНОВАТЕЛЬ & CEO: РАФИГ КАДИРОВ (@DELOY)", hero_desc: "DeLoYGroup — инновационная IT-компания, создающая масштабируемые игровые платформы и революционный гибрид социалки WhatsApp + Instagram.",
+        hero_btn_projects: "Исследовать проекты", projects_title: "Флагманские Разработки", projects_subtitle: "Ключевые цифровые продукты компании DeLoYGroup",
+        contact_title: "Связаться с DeLoYGroup"
+      },
+      en: {
+        nav_about: "About", nav_projects: "Projects", nav_ide: "VS Code Terminal", nav_game: "Cyber Game", nav_telemetry: "Telemetry", nav_contact: "Contact",
+        hero_badge: "FOUNDER & CEO: RAFIQ QADIROV (@DELOY)", hero_desc: "DeLoYGroup is an innovative tech ecosystem building scalable gaming platforms and a revolutionary WhatsApp + Instagram hybrid social app.",
+        hero_btn_projects: "Explore Projects", projects_title: "Flagship Innovations", projects_subtitle: "Core digital products developed by DeLoYGroup",
+        contact_title: "Contact DeLoYGroup"
+      },
+      az: {
+        nav_about: "Haqqımızda", nav_projects: "Layihələr", nav_ide: "VS Code Terminal", nav_game: "Oyun", nav_telemetry: "Telemetriya", nav_contact: "Əlaqə",
+        hero_badge: "TƏSİSÇİ VƏ CEO: RAFİQ QADİROV (@DELOY)", hero_desc: "DeLoYGroup — miqyaslanan oyun platformaları və WhatsApp + Instagram hibrid sosial tətbiqini yaradan texnoloji şirkətdir.",
+        hero_btn_projects: "Layihələrə Bax", projects_title: "Əsas Layihələr", projects_subtitle: "DeLoYGroup tərəfindən hazırlanmış rəqəmsal məhsullar",
+        contact_title: "DeLoYGroup ilə Əlaqə"
       }
+    };
 
-      // Update & Draw Particles
-      for (let i = particles.length - 1; i >= 0; i--) {
-        let p = particles[i];
-        p.x += p.dx;
-        p.y += p.dy;
-        p.life--;
-
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        if (p.life <= 0) particles.splice(i, 1);
-      }
-
-      requestAnimationFrame(gameLoop);
+    function changeLanguage(lang) {
+      const dict = translations[lang] || translations['en'];
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.innerText = dict[key];
+      });
     }
   </script>
 </body>
+</html>
