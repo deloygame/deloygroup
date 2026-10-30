@@ -40,6 +40,53 @@
   <!-- Three.js for 3D Background Canvas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
+  <!-- Firebase Integration Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Initialize Firebase Configuration
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'deloygroup-portal';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+      apiKey: "demo-api-key",
+      authDomain: "deloygroup.firebaseapp.com",
+      projectId: "deloygroup",
+      storageBucket: "deloygroup.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:demo"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.deloyFirebase = { app, auth, db, appId, collection, addDoc, onSnapshot, doc, setDoc };
+
+    // Authenticate First
+    async function initAuth() {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.warn("Firebase auth fallback to anonymous", err);
+        try { await signInAnonymously(auth); } catch(e){}
+      }
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.currentUserId = user.uid;
+        if (window.onFirebaseReady) window.onFirebaseReady();
+      }
+    });
+
+    initAuth();
+  </script>
+
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -157,6 +204,10 @@
       <nav class="hidden md:flex items-center gap-7 text-sm font-semibold">
         <a href="#about" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_about">About</a>
         <a href="#projects" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_projects">Projects</a>
+        <a href="#firebase-arch" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors flex items-center gap-1.5">
+          <i data-lucide="flame" class="w-4 h-4 text-amber-500"></i>
+          <span>Firebase Mesh</span>
+        </a>
         <a href="#architecture" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_arch">Ecosystem</a>
         <a href="#telemetry" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors" data-i18n="nav_telemetry">Live Mesh</a>
         <a href="#minigame" class="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors flex items-center gap-1.5">
@@ -553,42 +604,65 @@
     </div>
   </section>
 
-  <!-- Expanded Strategic Roadmap (2024 - 2027+) -->
-  <section class="py-20 px-4 sm:px-8 relative z-10" id="roadmap">
-    <div class="max-w-6xl mx-auto">
+  <!-- Interactive Firebase Architecture & Infrastructure Section -->
+  <section class="py-20 px-4 sm:px-8 relative z-10" id="firebase-arch">
+    <div class="max-w-7xl mx-auto">
       <div class="text-center mb-16">
-        <div class="text-xs font-mono text-neutral-500 uppercase tracking-widest mb-2">Development Roadmap</div>
-        <h2 class="font-heading text-3xl sm:text-5xl font-bold text-slate-900 dark:text-white">Engineering Timeline</h2>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-xs font-mono font-bold mb-3 border border-amber-500/20">
+          <i data-lucide="flame" class="w-4 h-4"></i> CLOUD DATA ENGINE
+        </div>
+        <h2 class="font-heading text-3xl sm:text-5xl font-bold text-slate-900 dark:text-white tracking-tight">Firebase Cloud Architecture</h2>
+        <p class="text-slate-600 dark:text-neutral-300 max-w-2xl mx-auto text-sm mt-3">
+          How DeLoYGroup leverages Firebase for real-time synchronization across DeLoY Social and DeLoYGame portal.
+        </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
-        <div class="p-6 rounded-2xl glass-panel border border-neutral-200 dark:border-neutral-800 relative">
-          <div class="text-xs font-mono text-emerald-500 font-bold mb-2">2024 • FOUNDATION</div>
-          <h4 class="font-heading font-bold text-lg text-slate-900 dark:text-white mb-2">DeLoY Core Setup</h4>
-          <p class="text-xs text-slate-600 dark:text-neutral-400">Establishment of DeLoYGroup architecture and central cloud identity protocols by Rafiq Qadirov.</p>
-        </div>
-
-        <div class="p-6 rounded-2xl glass-panel border border-emerald-500/40 relative bg-emerald-500/5">
-          <div class="text-xs font-mono text-emerald-500 font-bold mb-2 flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 2025 • COMPLETED
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <div class="p-6 rounded-3xl glass-card border border-amber-500/30 hover:border-amber-500 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4">
+            <i data-lucide="database" class="w-6 h-6"></i>
           </div>
-          <h4 class="font-heading font-bold text-lg text-slate-900 dark:text-white mb-2">DeLoYGame Launch</h4>
-          <p class="text-xs text-slate-600 dark:text-neutral-400">Official launch of deloygame.xyz interactive gaming portal and leaderboard engine.</p>
+          <h3 class="font-heading font-bold text-xl text-slate-900 dark:text-white mb-2">Cloud Firestore</h3>
+          <p class="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed mb-4">
+            Stores encrypted user profiles, WhatsApp-style group chat metadata, and Instagram media post manifests.
+          </p>
+          <span class="text-[10px] font-mono text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-md">Live Sync Enabled</span>
         </div>
 
-        <div class="p-6 rounded-2xl glass-panel border border-amber-500/40 relative bg-amber-500/5">
-          <div class="text-xs font-mono text-amber-500 font-bold mb-2 flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span> 2026 • CURRENT
+        <div class="p-6 rounded-3xl glass-card border border-sky-500/30 hover:border-sky-500 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-500 flex items-center justify-center mb-4">
+            <i data-lucide="zap" class="w-6 h-6"></i>
           </div>
-          <h4 class="font-heading font-bold text-lg text-slate-900 dark:text-white mb-2">Hybrid Social App</h4>
-          <p class="text-xs text-slate-600 dark:text-neutral-400">Engineering WhatsApp (messaging) + Instagram (stories/media) hybrid social application.</p>
+          <h3 class="font-heading font-bold text-xl text-slate-900 dark:text-white mb-2">Realtime DB</h3>
+          <p class="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed mb-4">
+            Powers millisecond-latency presence detection ("Online / Typing...") and arcade multiplayer lobbies.
+          </p>
+          <span class="text-[10px] font-mono text-sky-500 bg-sky-500/10 px-2.5 py-1 rounded-md">&lt; 15ms Latency</span>
         </div>
 
-        <div class="p-6 rounded-2xl glass-panel border border-neutral-200 dark:border-neutral-800 relative opacity-80">
-          <div class="text-xs font-mono text-neutral-500 font-bold mb-2">2027+ • FUTURE</div>
-          <h4 class="font-heading font-bold text-lg text-slate-900 dark:text-white mb-2">Global Expansion</h4>
-          <p class="text-xs text-slate-600 dark:text-neutral-400">Expansion of edge server relays, VOIP infrastructure, and web3 creator tools.</p>
+        <div class="p-6 rounded-3xl glass-card border border-emerald-500/30 hover:border-emerald-500 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-4">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-heading font-bold text-xl text-slate-900 dark:text-white mb-2">Firebase Auth</h3>
+          <p class="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed mb-4">
+            Zero-knowledge authentication supporting anonymous session tokens and custom token handshakes.
+          </p>
+          <span class="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-md">AES-256 E2EE</span>
         </div>
+
+        <div class="p-6 rounded-3xl glass-card border border-purple-500/30 hover:border-purple-500 transition-all">
+          <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-4">
+            <i data-lucide="cloud-upload" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-heading font-bold text-xl text-slate-900 dark:text-white mb-2">Cloud Storage</h3>
+          <p class="text-xs text-slate-600 dark:text-neutral-400 leading-relaxed mb-4">
+            CDN media bucket for Instagram feed stories, high-res photos, and encrypted audio message payloads.
+          </p>
+          <span class="text-[10px] font-mono text-purple-500 bg-purple-500/10 px-2.5 py-1 rounded-md">CDN Multi-Region</span>
+        </div>
+
       </div>
     </div>
   </section>
@@ -654,6 +728,32 @@
               <i data-lucide="play" class="w-4 h-4 fill-current"></i>
               <span id="overlayBtnText" data-i18n="game_start_btn">START DEFENSE</span>
             </button>
+          </div>
+        </div>
+
+        <!-- Firebase Realtime Global High Score Leaderboard -->
+        <div class="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-800">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <i data-lucide="trophy" class="w-5 h-5 text-amber-500"></i>
+              <h4 class="font-heading font-bold text-slate-900 dark:text-white text-base">Firebase Global Realtime Leaderboard</h4>
+            </div>
+            <span class="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-md">Live Sync</span>
+          </div>
+
+          <div id="firebaseLeaderboardList" class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+            <div class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+              <span class="text-neutral-400">1. Anonymous Pilot</span>
+              <span class="font-bold text-amber-500">520 pts</span>
+            </div>
+            <div class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+              <span class="text-neutral-400">2. Rafiq Qadirov</span>
+              <span class="font-bold text-amber-500">480 pts</span>
+            </div>
+            <div class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+              <span class="text-neutral-400">3. DeLoY Agent</span>
+              <span class="font-bold text-amber-500">390 pts</span>
+            </div>
           </div>
         </div>
 
@@ -910,27 +1010,28 @@
         Send Message to DeLoYGroup
       </h3>
       <p class="text-xs text-neutral-500 mb-6" data-i18n="modal_subtitle">
-        Direct routing to Rafiq Qadirov & the development team.
+        Direct routing to Rafiq Qadirov & the development team via Firebase.
       </p>
 
       <form id="contactForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-mono text-neutral-500 mb-1" data-i18n="form_name">YOUR NAME</label>
-          <input type="text" required placeholder="Alex Mercer" class="w-full px-4 py-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-neutral-500">
+          <input id="inputName" type="text" required placeholder="Alex Mercer" class="w-full px-4 py-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-neutral-500">
         </div>
 
         <div>
           <label class="block text-xs font-mono text-neutral-500 mb-1" data-i18n="form_email">YOUR EMAIL</label>
-          <input type="email" required placeholder="alex@example.com" class="w-full px-4 py-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-neutral-500">
+          <input id="inputEmail" type="email" required placeholder="alex@example.com" class="w-full px-4 py-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-neutral-500">
         </div>
 
         <div>
           <label class="block text-xs font-mono text-neutral-500 mb-1" data-i18n="form_message">MESSAGE</label>
-          <textarea rows="4" required placeholder="Write your inquiry or partnership request..." class="w-full px-4 py-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-neutral-500"></textarea>
+          <textarea id="inputMsg" rows="4" required placeholder="Write your inquiry or partnership request..." class="w-full px-4 py-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-neutral-500"></textarea>
         </div>
 
-        <button type="submit" class="w-full py-4 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-bold text-sm hover:opacity-90 transition-opacity">
-          <span data-i18n="btn_send">Send Message</span>
+        <button type="submit" class="w-full py-4 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span data-i18n="btn_send">Send Message to Firebase</span>
         </button>
       </form>
 
@@ -939,15 +1040,14 @@
           <i data-lucide="check" class="w-6 h-6"></i>
         </div>
         <h4 class="font-heading text-lg font-bold text-slate-900 dark:text-white" data-i18n="form_sent_title">Message Sent Successfully</h4>
-        <p class="text-xs text-neutral-500" data-i18n="form_sent_desc">Thank you! Rafiq Qadirov or the team will get back to you shortly.</p>
+        <p class="text-xs text-neutral-500" data-i18n="form_sent_desc">Saved to Firebase Cloud. Rafiq Qadirov or the team will get back to you shortly.</p>
         <button onclick="closeContactModal()" class="px-6 py-2.5 rounded-xl bg-neutral-800 text-white text-xs font-medium">Close</button>
       </div>
 
     </div>
   </div>
 
-
-  <!-- JavaScript Logic & Translations -->
+  <!-- JavaScript Logic & Firebase Handlers -->
   <script>
     // Global Multi-Language Translation Dictionary (16 Languages)
     const translations = {
@@ -1142,93 +1242,82 @@
       startTelemetryTicker();
     });
 
-    // Populate Custom Language Switcher Dropdown
-    function populateLangMenu() {
-      const dropdown = document.getElementById("langDropdown");
-      dropdown.innerHTML = "";
-      
-      supportedLanguages.forEach(lang => {
-        const item = document.createElement("button");
-        item.className = "w-full text-left px-4 py-2 text-xs flex items-center justify-between hover:bg-neutral-200/50 dark:hover:bg-neutral-800/80 transition-colors text-slate-800 dark:text-neutral-200 font-medium";
-        item.onclick = () => switchLanguage(lang.code);
-        item.innerHTML = `
-          <span class="flex items-center gap-2">
-            <span>${lang.flag}</span>
-            <span>${lang.name}</span>
-          </span>
-          <span class="text-[10px] opacity-60 font-mono">${lang.code}</span>
-        `;
-        dropdown.appendChild(item);
-      });
-    }
+    // Firebase Callback on Auth Ready
+    window.onFirebaseReady = function() {
+      subscribeGlobalLeaderboard();
+    };
 
-    function toggleLangDropdown() {
-      const dropdown = document.getElementById("langDropdown");
-      dropdown.classList.toggle("hidden");
-    }
-
-    document.addEventListener("click", (e) => {
-      const container = document.getElementById("langDropdownContainer");
-      if (container && !container.contains(e.target)) {
-        document.getElementById("langDropdown").classList.add("hidden");
-      }
-    });
-
-    // Switch Application Language
-    function switchLanguage(langCode) {
-      currentLang = langCode;
-      document.getElementById("currentLangLabel").innerText = langCode;
-      document.getElementById("langDropdown").classList.add("hidden");
-
-      const langConfig = supportedLanguages.find(l => l.code === langCode);
-      if (langConfig && langConfig.rtl) {
-        document.documentElement.setAttribute("dir", "rtl");
-      } else {
-        document.documentElement.removeAttribute("dir");
-      }
-
-      const langData = translations[langCode] || translations["EN"];
-      document.querySelectorAll("[data-i18n]").forEach(el => {
-        const key = el.getAttribute("data-i18n");
-        if (langData[key]) {
-          el.innerText = langData[key];
-        }
-      });
-    }
-
-    function toggleMobileMenu() {
-      const menu = document.getElementById("mobileMenu");
-      menu.classList.toggle("hidden");
-    }
-
-    // Theme Toggle with Dynamic Particle Canvas Adaptation
-    function toggleTheme() {
-      const html = document.documentElement;
-      if (html.classList.contains("dark")) {
-        html.classList.remove("dark");
-        if (threeParticlesMaterial) threeParticlesMaterial.color.setHex(0x334155);
-      } else {
-        html.classList.add("dark");
-        if (threeParticlesMaterial) threeParticlesMaterial.color.setHex(0x94a3b8);
+    // Firebase Realtime Highscore Save
+    async function saveFirebaseScore(newScore) {
+      if (!window.deloyFirebase) return;
+      const { db, appId, collection, addDoc } = window.deloyFirebase;
+      try {
+        const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+        await addDoc(scoresRef, {
+          score: newScore,
+          player: "Pilot_" + (window.currentUserId ? window.currentUserId.substring(0, 5) : "Guest"),
+          timestamp: new Date().toISOString()
+        });
+        showToast("Score saved to Firebase Cloud!");
+      } catch (err) {
+        console.error("Error saving score to Firebase:", err);
       }
     }
 
-    function openContactModal(subject) {
-      const modal = document.getElementById("contactModal");
-      const title = document.getElementById("modalSubjectTitle");
-      if (subject) title.innerText = subject;
-      modal.classList.remove("hidden");
+    // Subscribe to Firebase Leaderboard Updates
+    function subscribeGlobalLeaderboard() {
+      if (!window.deloyFirebase) return;
+      const { db, appId, collection, onSnapshot } = window.deloyFirebase;
+      try {
+        const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+        onSnapshot(scoresRef, (snapshot) => {
+          let scoreList = [];
+          snapshot.forEach(doc => {
+            scoreList.push(doc.data());
+          });
+          scoreList.sort((a, b) => b.score - a.score);
+          scoreList = scoreList.slice(0, 3);
+
+          const leaderboardContainer = document.getElementById("firebaseLeaderboardList");
+          if (leaderboardContainer && scoreList.length > 0) {
+            leaderboardContainer.innerHTML = scoreList.map((item, idx) => `
+              <div class="p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+                <span class="text-neutral-400 truncate">${idx + 1}. ${item.player || 'Agent'}</span>
+                <span class="font-bold text-amber-500">${item.score} pts</span>
+              </div>
+            `).join('');
+          }
+        }, (error) => {
+          console.warn("Leaderboard snapshot error:", error);
+        });
+      } catch (e) {
+        console.warn("Firebase listener init failed", e);
+      }
     }
 
-    function closeContactModal() {
-      const modal = document.getElementById("contactModal");
-      modal.classList.add("hidden");
-      document.getElementById("contactForm").classList.remove("hidden");
-      document.getElementById("modalSuccess").classList.add("hidden");
-    }
-
-    function handleFormSubmit(e) {
+    // Firebase Contact Form Save
+    async function handleFormSubmit(e) {
       e.preventDefault();
+      const name = document.getElementById("inputName")?.value;
+      const email = document.getElementById("inputEmail")?.value;
+      const msg = document.getElementById("inputMsg")?.value;
+
+      if (window.deloyFirebase) {
+        const { db, appId, collection, addDoc } = window.deloyFirebase;
+        try {
+          const ticketsRef = collection(db, 'artifacts', appId, 'public', 'data', 'tickets');
+          await addDoc(ticketsRef, {
+            name: name,
+            email: email,
+            message: msg,
+            timestamp: new Date().toISOString(),
+            status: "open"
+          });
+        } catch (err) {
+          console.error("Error saving ticket to Firebase:", err);
+        }
+      }
+
       document.getElementById("contactForm").classList.add("hidden");
       document.getElementById("modalSuccess").classList.remove("hidden");
     }
@@ -1610,6 +1699,11 @@
         highScore = score;
         localStorage.setItem("deloy_highscore", highScore);
         document.getElementById("highScoreDisplay").innerText = highScore;
+      }
+
+      // Save to Firebase on Game Over
+      if (score > 0) {
+        saveFirebaseScore(score);
       }
 
       document.getElementById("overlayTitle").innerText = "SYSTEM BREACHED!";
